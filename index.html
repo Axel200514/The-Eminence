@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Eminence | Brawl Stars Clan</title>
+
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/reset.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/utilities.css">
+</head>
+<body>
+    <header class="app-navbar">
+        <div class="navbar-container">
+            <div class="nav-brand text-gradient">THE EMINENCE</div>
+            <div class="nav-status">
+                <span class="status-dot"></span>
+                <span>API Live (5h Cache)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <section id="state-loading" class="loader-container">
+            <div class="spinner"></div>
+            <p class="text-secondary">Cargando estadísticas del clan...</p>
+        </section>
+
+        <section id="state-error" class="glass-panel error-card hidden">
+            <h2 class="error-title">Error al cargar clan</h2>
+            <p id="error-message" class="text-secondary"></p>
+            <button class="retry-btn" onclick="location.reload()">Reintentar</button>
+        </section>
+
+        <section id="state-content" class="hidden">
+            <div class="glass-panel clan-header-card">
+                <h1 id="clan-name" class="clan-main-title text-gradient">The Eminence</h1>
+                <div id="clan-tag" class="clan-tag-badge">#80L9UYGQG</div>
+                <p id="clan-desc" class="clan-description-text"></p>
+            </div>
+
+            <div class="grid-stats">
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div>
+                        <div class="stat-label">Copas Totales</div>
+                        <div id="total-trophies" class="stat-value text-gold">0</div>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div>
+                        <div class="stat-label">Miembros</div>
+                        <div id="member-count" class="stat-value text-neon">0 / 30</div>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon">👑</div>
+                    <div>
+                        <div class="stat-label">Presidente</div>
+                        <div id="president-name" class="stat-value"></div>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div>
+                        <div class="stat-label">Copas Requeridas</div>
+                        <div id="required-trophies" class="stat-value text-purple">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="members-controls">
+                <input type="text" id="search-input" class="search-bar" placeholder="Buscar miembro por nombre o tag...">
+                <select id="sort-select" class="sort-select">
+                    <option value="trophies-desc">🏆 Mayor a menor copas</option>
+                    <option value="trophies-asc">🏆 Menor a mayor copas</option>
+                    <option value="name-asc">🔤 Nombre (A-Z)</option>
+                </select>
+            </div>
+
+            <div id="members-list" class="grid-members"></div>
+        </section>
+    </main>
+
+    <template id="member-template">
+        <div class="glass-panel member-card">
+            <div class="member-rank"></div>
+            <div class="member-info">
+                <div class="member-header">
+                    <span class="member-name"></span>
+                    <span class="badge member-role-badge"></span>
+                </div>
+                <div class="member-details">
+                    <span class="member-tag"></span>
+                    <span class="member-trophies text-gold"></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script type="module" src="app/app.js"></script>
+</body>
+</html>
