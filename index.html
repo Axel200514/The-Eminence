@@ -100,6 +100,88 @@
         </div>
     </template>
 
+    <div id="player-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <button id="close-modal" class="modal-close">&times;</button>
+            
+            <div id="modal-loading" class="loader-container">
+                <div class="spinner"></div>
+                <p class="text-secondary">Cargando perfil del jugador...</p>
+            </div>
+
+            <div id="modal-error" class="error-card hidden">
+                <h2 class="error-title">Error</h2>
+                <p id="modal-error-message" class="text-secondary"></p>
+            </div>
+
+            <div id="modal-body" class="hidden">
+                <div class="player-hero">
+                    <div class="player-hero-info">
+                        <h2 id="player-name" class="player-name text-gradient"></h2>
+                        <span id="player-tag" class="clan-tag-badge"></span>
+                        <div class="player-level-badge">
+                            <span class="text-secondary">EXP Lvl:</span> <span id="player-level" class="text-neon"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-stats-grid">
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">🏆</div>
+                        <div>
+                            <div class="stat-label">Copas Actuales</div>
+                            <div id="player-trophies" class="stat-value text-gold"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">👑</div>
+                        <div>
+                            <div class="stat-label">Récord Copas</div>
+                            <div id="player-highest-trophies" class="stat-value text-gold"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">⚔️</div>
+                        <div>
+                            <div class="stat-label">Victorias 3v3</div>
+                            <div id="player-3v3-wins" class="stat-value text-neon"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">👤</div>
+                        <div>
+                            <div class="stat-label">Victorias Solo</div>
+                            <div id="player-solo-wins" class="stat-value text-green"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">👥</div>
+                        <div>
+                            <div class="stat-label">Victorias Dúo</div>
+                            <div id="player-duo-wins" class="stat-value text-purple"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="brawlers-title">Brawlers Desbloqueados (<span id="brawlers-count"></span>)</h3>
+                <div id="brawlers-list" class="brawlers-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <template id="brawler-template">
+        <div class="brawler-card">
+            <div class="brawler-header">
+                <span class="brawler-name"></span>
+                <span class="badge brawler-power"></span>
+            </div>
+            <div class="brawler-stats">
+                <span>🏆 <span class="brawler-trophies text-gold"></span></span>
+                <span class="text-muted text-small">Récord: <span class="brawler-highest"></span></span>
+            </div>
+        </div>
+    </template>
+
     <script type="module" src="app/app.js"></script>
 </body>
 </html>

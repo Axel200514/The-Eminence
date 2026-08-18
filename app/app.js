@@ -99,6 +99,10 @@ class App {
 
         members.forEach((member, index) => {
             const clone = this.dom.memberTemplate.content.cloneNode(true);
+            const card = clone.querySelector('.member-card');
+            
+            card.classList.add('clickable');
+            card.addEventListener('click', () => this.openPlayerProfile(member.tag));
             
             clone.querySelector('.member-rank').textContent = `#${index + 1}`;
             clone.querySelector('.member-name').textContent = member.name;
@@ -113,6 +117,61 @@ class App {
         });
 
         this.dom.membersList.appendChild(fragment);
+    }
+
+    async openPlayerProfile(tag) {
+        const modal = document.getElementById('player-modal');
+        const loading = document.getElementById('modal-loading');
+        const error = document.getElementById('modal-error');
+        const body = document.getElementById('modal-body');
+        
+        modal.classList.remove('hidden');
+        loading.classList.remove('hidden');
+        error.classList.add('hidden');
+        body.classList.add('hidden');
+        
+        document.getElementById('close-modal').onclick = () => modal.classList.add('hidden');
+
+        try {
+            const { PlayerService } = await import('../modules/core/services/player.service.js');
+            const data = await PlayerService.getPlayerData(tag);
+            
+            document.getElementById('player-name').textContent = data.name;
+            document.getElementById('player-tag').textContent = data.tag;
+            document.getElementById('player-level').textContent = data.expLevel;
+            document.getElementById('player-trophies').textContent = formatNumber(data.trophies);
+            document.getElementById('player-highest-trophies').textContent = formatNumber(data.highestTrophies);
+            document.getElementById('player-3v3-wins').textContent = formatNumber(data['3vs3Victories']);
+            document.getElementById('player-solo-wins').textContent = formatNumber(data.soloVictories);
+            document.getElementById('player-duo-wins').textContent = formatNumber(data.duoVictories);
+            
+            const brawlers = data.brawlers || [];
+            document.getElementById('brawlers-count').textContent = brawlers.length;
+            
+            const brawlersList = document.getElementById('brawlers-list');
+            brawlersList.textContent = '';
+            
+            const brawlerTemplate = document.getElementById('brawler-template');
+            const frag = document.createDocumentFragment();
+            
+            brawlers.sort((a, b) => b.trophies - a.trophies).forEach(brawler => {
+                const clone = brawlerTemplate.content.cloneNode(true);
+                clone.querySelector('.brawler-name').textContent = brawler.name;
+                clone.querySelector('.brawler-power').textContent = `Fuerza ${brawler.power}`;
+                clone.querySelector('.brawler-trophies').textContent = formatNumber(brawler.trophies);
+                clone.querySelector('.brawler-highest').textContent = formatNumber(brawler.highestTrophies);
+                frag.appendChild(clone);
+            });
+            
+            brawlersList.appendChild(frag);
+            
+            loading.classList.add('hidden');
+            body.classList.remove('hidden');
+        } catch (err) {
+            loading.classList.add('hidden');
+            error.classList.remove('hidden');
+            document.getElementById('modal-error-message').textContent = err.message || 'No se pudo cargar el perfil.';
+        }
     }
 }
 
