@@ -159,25 +159,35 @@ class App {
             
             const brawlers = data.brawlers || [];
             
+            let totalPower = 0;
             let unlockedStarPowers = 0;
             let unlockedGadgets = 0;
             let unlockedGears = 0;
             
             brawlers.forEach(b => {
+                totalPower += b.power || 1;
                 unlockedStarPowers += (b.starPowers || []).length;
                 unlockedGadgets += (b.gadgets || []).length;
                 unlockedGears += (b.gears || []).length;
             });
             
             const TOTAL_BRAWLERS = 105;
-            const progressPercent = Math.min(100, Math.round((brawlers.length / TOTAL_BRAWLERS) * 100));
+            const MAX_STAR_POWERS = TOTAL_BRAWLERS * 2;
+            const MAX_GADGETS = TOTAL_BRAWLERS * 2;
+            const MAX_GEARS = TOTAL_BRAWLERS * 7;
+            
+            const currentPoints = (brawlers.length * 10) + totalPower + (unlockedStarPowers * 3) + (unlockedGadgets * 3) + (unlockedGears * 2);
+            const maxPoints = (TOTAL_BRAWLERS * 10) + (TOTAL_BRAWLERS * 11) + (MAX_STAR_POWERS * 3) + (MAX_GADGETS * 3) + (MAX_GEARS * 2);
+            
+            const progressPercent = Math.min(100, Math.round((currentPoints / maxPoints) * 100));
             
             const progFill = document.getElementById('progression-fill');
             progFill.style.width = `${progressPercent}%`;
             document.getElementById('progression-text').textContent = `${progressPercent}%`;
+            
             document.getElementById('prog-brawlers').textContent = `${brawlers.length}/${TOTAL_BRAWLERS}`;
-            document.getElementById('prog-starpowers').textContent = unlockedStarPowers;
-            document.getElementById('prog-gadgets').textContent = unlockedGadgets;
+            document.getElementById('prog-starpowers').textContent = `${unlockedStarPowers}/${MAX_STAR_POWERS}`;
+            document.getElementById('prog-gadgets').textContent = `${unlockedGadgets}/${MAX_GADGETS}`;
             document.getElementById('prog-gears').textContent = unlockedGears;
             
             const brawlersList = document.getElementById('brawlers-list');
