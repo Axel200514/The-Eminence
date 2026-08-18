@@ -186,9 +186,9 @@ class App {
             document.getElementById('progression-text').textContent = `${progressPercent}%`;
             
             document.getElementById('prog-brawlers').textContent = `${brawlers.length}/${TOTAL_BRAWLERS}`;
-            document.getElementById('prog-starpowers').textContent = `${unlockedStarPowers}/${MAX_STAR_POWERS}`;
-            document.getElementById('prog-gadgets').textContent = `${unlockedGadgets}/${MAX_GADGETS}`;
-            document.getElementById('prog-gears').textContent = unlockedGears;
+            document.getElementById('prog-starpowers').textContent = Math.max(0, MAX_STAR_POWERS - unlockedStarPowers);
+            document.getElementById('prog-gadgets').textContent = Math.max(0, MAX_GADGETS - unlockedGadgets);
+            document.getElementById('prog-gears').textContent = Math.max(0, MAX_GEARS - unlockedGears);
             
             const brawlersList = document.getElementById('brawlers-list');
             brawlersList.textContent = '';
