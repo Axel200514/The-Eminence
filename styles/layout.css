@@ -408,3 +408,65 @@
 .clickable:hover {
     transform: scale(1.02);
 }
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 24px 0 12px;
+    letter-spacing: 1px;
+}
+
+.progression-container {
+    padding: 20px;
+    margin-bottom: 24px;
+    border-radius: var(--radius-lg);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    position: relative;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-neon), var(--accent-purple));
+    border-radius: 8px;
+    transition: width 0.5s ease-out;
+}
+
+.progress-bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.progression-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+.prog-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.prog-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.prog-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}

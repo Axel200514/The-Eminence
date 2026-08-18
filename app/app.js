@@ -136,17 +136,49 @@ class App {
             const { PlayerService } = await import('../modules/core/services/player.service.js');
             const data = await PlayerService.getPlayerData(tag);
             
+            const total3v3 = data['3vs3Victories'] || 0;
+            const totalSolo = data.soloVictories || 0;
+            const totalDuo = data.duoVictories || 0;
+            const totalWins = total3v3 + totalSolo + totalDuo;
+            const hoursSpent = Math.floor((totalWins * 2.5) / 60);
+
             document.getElementById('player-name').textContent = data.name;
             document.getElementById('player-tag').textContent = data.tag;
-            document.getElementById('player-level').textContent = data.expLevel;
+            
             document.getElementById('player-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('player-highest-trophies').textContent = formatNumber(data.highestTrophies);
-            document.getElementById('player-3v3-wins').textContent = formatNumber(data['3vs3Victories']);
-            document.getElementById('player-solo-wins').textContent = formatNumber(data.soloVictories);
-            document.getElementById('player-duo-wins').textContent = formatNumber(data.duoVictories);
+            document.getElementById('player-level').textContent = data.expLevel;
+            document.getElementById('player-xp-points').textContent = formatNumber(data.expPoints);
+            
+            document.getElementById('player-total-wins').textContent = formatNumber(totalWins);
+            document.getElementById('player-hours').textContent = formatNumber(hoursSpent);
+            
+            document.getElementById('player-3v3-wins').textContent = formatNumber(total3v3);
+            document.getElementById('player-solo-wins').textContent = formatNumber(totalSolo);
+            document.getElementById('player-duo-wins').textContent = formatNumber(totalDuo);
             
             const brawlers = data.brawlers || [];
-            document.getElementById('brawlers-count').textContent = brawlers.length;
+            
+            let unlockedStarPowers = 0;
+            let unlockedGadgets = 0;
+            let unlockedGears = 0;
+            
+            brawlers.forEach(b => {
+                unlockedStarPowers += (b.starPowers || []).length;
+                unlockedGadgets += (b.gadgets || []).length;
+                unlockedGears += (b.gears || []).length;
+            });
+            
+            const TOTAL_BRAWLERS = 82;
+            const progressPercent = Math.min(100, Math.round((brawlers.length / TOTAL_BRAWLERS) * 100));
+            
+            const progFill = document.getElementById('progression-fill');
+            progFill.style.width = `${progressPercent}%`;
+            document.getElementById('progression-text').textContent = `${progressPercent}%`;
+            document.getElementById('prog-brawlers').textContent = `${brawlers.length}/${TOTAL_BRAWLERS}`;
+            document.getElementById('prog-starpowers').textContent = unlockedStarPowers;
+            document.getElementById('prog-gadgets').textContent = unlockedGadgets;
+            document.getElementById('prog-gears').textContent = unlockedGears;
             
             const brawlersList = document.getElementById('brawlers-list');
             brawlersList.textContent = '';

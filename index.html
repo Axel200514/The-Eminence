@@ -119,51 +119,103 @@
                     <div class="player-hero-info">
                         <h2 id="player-name" class="player-name text-gradient"></h2>
                         <span id="player-tag" class="clan-tag-badge"></span>
-                        <div class="player-level-badge">
-                            <span class="text-secondary">EXP Lvl:</span> <span id="player-level" class="text-neon"></span>
-                        </div>
                     </div>
                 </div>
 
+                <h3 class="section-title text-green">PLAYER STATS</h3>
                 <div class="player-stats-grid">
                     <div class="stat-card minimal">
                         <div class="stat-icon">🏆</div>
                         <div>
+                            <div class="stat-value text-gold" id="player-trophies"></div>
                             <div class="stat-label">Copas Actuales</div>
-                            <div id="player-trophies" class="stat-value text-gold"></div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
                         <div class="stat-icon">👑</div>
                         <div>
+                            <div class="stat-value text-gold" id="player-highest-trophies"></div>
                             <div class="stat-label">Récord Copas</div>
-                            <div id="player-highest-trophies" class="stat-value text-gold"></div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">⭐</div>
+                        <div>
+                            <div class="stat-value text-neon" id="player-level"></div>
+                            <div class="stat-label">Nivel de XP</div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">✨</div>
+                        <div>
+                            <div class="stat-value text-neon" id="player-xp-points"></div>
+                            <div class="stat-label">Puntos XP</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
                         <div class="stat-icon">⚔️</div>
                         <div>
+                            <div class="stat-value text-gold" id="player-total-wins"></div>
+                            <div class="stat-label">Victorias Totales</div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">🕒</div>
+                        <div>
+                            <div class="stat-value text-purple" id="player-hours"></div>
+                            <div class="stat-label">Horas Jugadas</div>
+                        </div>
+                    </div>
+                    <div class="stat-card minimal">
+                        <div class="stat-icon">🔴</div>
+                        <div>
+                            <div class="stat-value text-red" id="player-3v3-wins"></div>
                             <div class="stat-label">Victorias 3v3</div>
-                            <div id="player-3v3-wins" class="stat-value text-neon"></div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
                         <div class="stat-icon">👤</div>
                         <div>
+                            <div class="stat-value text-green" id="player-solo-wins"></div>
                             <div class="stat-label">Victorias Solo</div>
-                            <div id="player-solo-wins" class="stat-value text-green"></div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
                         <div class="stat-icon">👥</div>
                         <div>
+                            <div class="stat-value text-blue" id="player-duo-wins"></div>
                             <div class="stat-label">Victorias Dúo</div>
-                            <div id="player-duo-wins" class="stat-value text-purple"></div>
                         </div>
                     </div>
                 </div>
 
-                <h3 class="brawlers-title">Top 8 Brawlers (Total: <span id="brawlers-count"></span>)</h3>
+                <h3 class="section-title text-green">PROGRESSION</h3>
+                <div class="progression-container glass-panel">
+                    <div class="progress-bar-wrapper">
+                        <div id="progression-fill" class="progress-bar-fill"></div>
+                        <span id="progression-text" class="progress-bar-text"></span>
+                    </div>
+                    <div class="progression-stats">
+                        <div class="prog-stat">
+                            <span class="prog-value text-neon" id="prog-brawlers"></span>
+                            <span class="prog-label">Brawlers Desbloqueados</span>
+                        </div>
+                        <div class="prog-stat">
+                            <span class="prog-value text-gold" id="prog-starpowers"></span>
+                            <span class="prog-label">Estelares Desbloqueadas</span>
+                        </div>
+                        <div class="prog-stat">
+                            <span class="prog-value text-green" id="prog-gadgets"></span>
+                            <span class="prog-label">Gadgets Desbloqueados</span>
+                        </div>
+                        <div class="prog-stat">
+                            <span class="prog-value text-purple" id="prog-gears"></span>
+                            <span class="prog-label">Refuerzos (Gears)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="section-title text-green">TOP BRAWLERS</h3>
                 <div id="brawlers-list" class="brawlers-grid"></div>
             </div>
         </div>
