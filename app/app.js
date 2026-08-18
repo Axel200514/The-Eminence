@@ -174,7 +174,7 @@ class App {
             const TOTAL_BRAWLERS = 105;
             const MAX_STAR_POWERS = TOTAL_BRAWLERS * 2;
             const MAX_GADGETS = TOTAL_BRAWLERS * 2;
-            const MAX_GEARS = TOTAL_BRAWLERS * 7;
+            const MAX_GEARS = (TOTAL_BRAWLERS * 5) + 50; // 5 basic + approx 50 epic/mythic
             
             const currentPoints = (brawlers.length * 10) + totalPower + (unlockedStarPowers * 3) + (unlockedGadgets * 3) + (unlockedGears * 2);
             const maxPoints = (TOTAL_BRAWLERS * 10) + (TOTAL_BRAWLERS * 11) + (MAX_STAR_POWERS * 3) + (MAX_GADGETS * 3) + (MAX_GEARS * 2);
