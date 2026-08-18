@@ -169,7 +169,7 @@ class App {
                 unlockedGears += (b.gears || []).length;
             });
             
-            const TOTAL_BRAWLERS = 82;
+            const TOTAL_BRAWLERS = 105;
             const progressPercent = Math.min(100, Math.round((brawlers.length / TOTAL_BRAWLERS) * 100));
             
             const progFill = document.getElementById('progression-fill');
