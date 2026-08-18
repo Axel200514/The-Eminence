@@ -39,7 +39,7 @@ export async function onRequest(context) {
                 'Accept': 'application/json'
             },
             cf: {
-                cacheTtl: 3600, // 1 hour cache for players (they update trophies more often)
+                cacheTtl: 3600,
                 cacheEverything: true
             }
         });

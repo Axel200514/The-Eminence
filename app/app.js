@@ -154,7 +154,7 @@ class App {
             const brawlerTemplate = document.getElementById('brawler-template');
             const frag = document.createDocumentFragment();
             
-            brawlers.sort((a, b) => b.trophies - a.trophies).forEach(brawler => {
+            brawlers.sort((a, b) => b.trophies - a.trophies).slice(0, 8).forEach(brawler => {
                 const clone = brawlerTemplate.content.cloneNode(true);
                 clone.querySelector('.brawler-name').textContent = brawler.name;
                 clone.querySelector('.brawler-power').textContent = `Fuerza ${brawler.power}`;
