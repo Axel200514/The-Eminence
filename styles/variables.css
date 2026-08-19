@@ -31,32 +31,45 @@
 }
 
 :root {
-    --bg-primary: #0b0e14;
-    --bg-secondary: #121824;
-    --bg-card: rgba(22, 31, 46, 0.75);
-    --bg-card-hover: rgba(30, 41, 59, 0.9);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(102, 252, 241, 0.3);
-
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-
-    --accent-neon: #66fcf1;
-    --accent-cyan: #45a29e;
-    --accent-gold: #fbbf24;
-    --accent-purple: #c084fc;
-    --accent-red: #f87171;
-    --accent-green: #4ade80;
-
-    --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* Main Dark Theme Colors */
+    --bg-main: #0a0a0f; /* Very dark, almost black */
+    --bg-secondary: #14151f; /* Slightly lighter for cards */
+    --bg-tertiary: #1f2133; /* For hovers and inner elements */
     
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
-    --radius-full: 9999px;
+    /* Vibrant Brawl Accents */
+    --accent-neon: #00e5ff; /* Cyan/Trophy Road */
+    --accent-purple: #c724b1; /* Mythic/Ranked */
+    --accent-gold: #ffc107; /* Trophies/Legendary */
+    --accent-red: #ff3366; /* Damage/HP */
+    --accent-green: #00ff88; /* Healing/Wins */
+    
+    /* Text Colors */
+    --text-main: #ffffff;
+    --text-secondary: #b3b5c6;
+    --text-muted: #6b6d80;
+    
+    /* Borders and Shadows (Gamer Aesthetic) */
+    --border-color: #2a2d45;
+    --border-thick: 2px solid var(--border-color);
+    --shadow-hard: 4px 4px 0px rgba(0, 0, 0, 1);
+    --shadow-hard-hover: 6px 6px 0px rgba(0, 229, 255, 0.4);
+    --shadow-glow: 0 0 15px rgba(0, 229, 255, 0.3);
+    
+    /* Radii */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    
+    /* Fonts */
+    --font-main: 'Outfit', system-ui, sans-serif;
+}
 
-    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-    --glow: 0 0 20px rgba(102, 252, 241, 0.15);
+body {
+    background-color: var(--bg-main);
+    background-image: radial-gradient(circle at 50% 0%, #1f2133 0%, transparent 50%),
+                      repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 10px);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    min-height: 100vh;
+    overflow-x: hidden;
 }

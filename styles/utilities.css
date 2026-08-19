@@ -11,50 +11,56 @@
 .text-right { text-align: right; }
 
 .text-gradient {
-    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-neon) 100%);
+    background: linear-gradient(135deg, var(--text-main), var(--accent-neon));
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(2px 2px 0px rgba(0,0,0,1));
+    text-transform: uppercase;
 }
 
-.text-gold { color: var(--accent-gold); }
-.text-neon { color: var(--accent-neon); }
-.text-purple { color: var(--accent-purple); }
-.text-muted { color: var(--text-muted); }
-.text-secondary { color: var(--text-secondary); }
+.text-gold { color: var(--accent-gold); text-shadow: 1px 1px 0px #000; }
+.text-neon { color: var(--accent-neon); text-shadow: 1px 1px 0px #000; }
+.text-purple { color: var(--accent-purple); text-shadow: 1px 1px 0px #000; }
+.text-red { color: var(--accent-red); text-shadow: 1px 1px 0px #000; }
+.text-green { color: var(--accent-green); text-shadow: 1px 1px 0px #000; }
+.text-blue { color: #3b82f6; text-shadow: 1px 1px 0px #000; }
 
 .badge {
-    display: inline-flex;
-    align-items: center;
+    display: inline-block;
     padding: 4px 10px;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    border: var(--border-thick);
+    box-shadow: 2px 2px 0px rgba(0,0,0,1);
+    transform: skewX(-5deg);
 }
 
 .badge-president {
-    background: rgba(251, 191, 36, 0.15);
+    background: rgba(255, 193, 7, 0.15);
     color: var(--accent-gold);
-    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-color: rgba(255, 193, 7, 0.4);
 }
 
 .badge-vp {
-    background: rgba(192, 132, 252, 0.15);
+    background: rgba(199, 36, 177, 0.15);
     color: var(--accent-purple);
-    border: 1px solid rgba(192, 132, 252, 0.3);
+    border-color: rgba(199, 36, 177, 0.4);
 }
 
 .badge-senior {
-    background: rgba(102, 252, 241, 0.12);
+    background: rgba(0, 229, 255, 0.15);
     color: var(--accent-neon);
-    border: 1px solid rgba(102, 252, 241, 0.25);
+    border-color: rgba(0, 229, 255, 0.4);
 }
 
 .badge-member {
-    background: rgba(148, 163, 184, 0.1);
+    background: rgba(179, 181, 198, 0.1);
     color: var(--text-secondary);
-    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-color: rgba(179, 181, 198, 0.3);
 }
 
 .retry-btn {

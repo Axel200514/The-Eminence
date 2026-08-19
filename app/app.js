@@ -126,11 +126,20 @@ class App {
         const body = document.getElementById('modal-body');
         
         modal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
         loading.classList.remove('hidden');
         error.classList.add('hidden');
         body.classList.add('hidden');
         
-        document.getElementById('close-modal').onclick = () => modal.classList.add('hidden');
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        };
+
+        document.getElementById('close-modal').onclick = closeModal;
+        modal.onclick = (e) => {
+            if (e.target === modal) closeModal();
+        };
 
         try {
             const { PlayerService } = await import('../modules/core/services/player.service.js');

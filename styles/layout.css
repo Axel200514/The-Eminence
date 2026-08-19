@@ -9,10 +9,10 @@
 }
 
 .navbar-container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     height: 100%;
-    padding: 0 16px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -41,25 +41,23 @@
 }
 
 .app-container {
-    width: 100%;
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 24px 16px 60px;
-    flex: 1;
+    padding: 24px 24px 60px;
 }
 
 .glass-panel {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    background: var(--bg-secondary);
+    border: var(--border-thick);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hard);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .glass-panel:hover {
-    border-color: var(--border-highlight);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hard-hover);
+    border-color: var(--accent-neon);
 }
 
 .clan-header-card {
@@ -122,19 +120,26 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    transform: skewX(-3deg);
+}
+
+.stat-card > div {
+    transform: skewX(3deg); /* unskew the content */
 }
 
 .stat-icon {
     width: 48px;
     height: 48px;
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+    border: var(--border-thick);
+    box-shadow: 2px 2px 0px rgba(0,0,0,1);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
     flex-shrink: 0;
+    transform: skewX(3deg);
 }
 
 .stat-label {
@@ -198,6 +203,11 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    transform: skewX(-2deg);
+}
+
+.member-card > * {
+    transform: skewX(2deg);
 }
 
 .member-rank {
@@ -302,7 +312,7 @@
 
 .modal-content {
     width: 100%;
-    max-width: 800px;
+    max-width: 1000px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
@@ -469,4 +479,8 @@
 .prog-label {
     font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+body.modal-open {
+    overflow: hidden;
 }
