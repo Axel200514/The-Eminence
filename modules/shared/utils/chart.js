@@ -9,19 +9,45 @@ export class ChartManager {
             this.instances[canvasId].destroy();
         }
 
-        if (!dataArray || dataArray.length === 0) {
-
+        if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
+            return;
         }
+
+        const parseDate = (dateStr) => {
+            if (!dateStr) return new Date();
+            if (typeof dateStr === 'string' && dateStr.includes(' ') && !dateStr.includes('T')) {
+                return new Date(dateStr.replace(' ', 'T') + 'Z');
+            }
+            return new Date(dateStr);
+        };
 
         const dailyMap = {};
         dataArray.forEach(d => {
-            const dateStr = new Date(d.recorded_at).toLocaleDateString();
-            dailyMap[dateStr] = d;
+            if (!d || !d.recorded_at) return;
+            const parsed = parseDate(d.recorded_at);
+            const dateStr = parsed.toLocaleDateString();
+            dailyMap[dateStr] = { ...d, _parsedDate: parsed };
         });
-        const cleanData = Object.values(dailyMap).sort((a,b) => new Date(a.recorded_at) - new Date(b.recorded_at));
+        const cleanData = Object.values(dailyMap).sort((a,b) => a._parsedDate - b._parsedDate);
 
-        const labels = cleanData.map(d => new Date(d.recorded_at).toLocaleDateString(undefined, {month:'short', day:'numeric'}));
+        if (cleanData.length === 0) return;
+
+        if (cleanData.length === 1) {
+            const fakeData = { ...cleanData[0] };
+            const fakeDate = new Date(fakeData._parsedDate);
+            fakeDate.setDate(fakeDate.getDate() - 1);
+            fakeData._parsedDate = fakeDate;
+            cleanData.unshift(fakeData);
+        }
+
+        const labels = cleanData.map(d => d._parsedDate.toLocaleDateString(undefined, {month:'short', day:'numeric'}));
         const data = cleanData.map(d => type === 'clan' ? d.total_trophies : d.trophies);
+
+        const yAxisConfig = {
+            ticks: { color: '#8b949e' }, 
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            grace: '5%'
+        };
 
         this.instances[canvasId] = new Chart(canvas, {
             type: 'line',
@@ -58,7 +84,7 @@ export class ChartManager {
                 },
                 scales: {
                     x: { ticks: { color: '#8b949e', maxTicksLimit: 7 }, grid: { display: false } },
-                    y: { ticks: { color: '#8b949e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    y: yAxisConfig
                 }
             }
         });

@@ -50,6 +50,7 @@ class App {
             this.clanData = await ClanService.getClanData();
             this.renderHeader();
             this.renderMembers();
+            this.setupClanChart();
             this.showState('content');
         } catch (error) {
             this.dom.errorMessage.textContent = error.message || 'Error al cargar los datos del clan.';
@@ -63,7 +64,7 @@ class App {
         this.dom.error.classList.toggle('hidden', state !== 'error');
         const exportBtn = document.getElementById('export-btn');
         if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportClanToCSV());
+            exportBtn.onclick = () => this.exportClanToCSV();
         }
     }
 
@@ -303,6 +304,8 @@ class App {
             
             brawlersList.appendChild(frag);
             
+            this.setupPlayerChart(tag);
+
             loading.classList.add('hidden');
             body.classList.remove('hidden');
         } catch (err) {
