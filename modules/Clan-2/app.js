@@ -1,7 +1,7 @@
-import { ClanService } from '../modules/core/services/clan.service.js';
-import { HistoryService } from '../modules/core/services/history.service.js';
-import { ChartManager } from '../modules/shared/utils/chart.js';
-import { formatNumber, formatRole, getRoleBadgeClass } from '../modules/shared/utils/formatters.js';
+import { Clan2Service } from './Services/clan-2.service.js';
+import { HistoryService } from '../core/services/history.service.js';
+import { ChartManager } from '../shared/utils/chart.js';
+import { formatNumber, formatRole, getRoleBadgeClass } from '../shared/utils/formatters.js';
 
 class App {
     constructor() {
@@ -47,7 +47,7 @@ class App {
     async loadClan() {
         this.showState('loading');
         try {
-            this.clanData = await ClanService.getClanData();
+            this.clanData = await Clan2Service.getClanData();
             this.renderHeader();
             this.renderMembers();
             this.showState('content');
@@ -216,7 +216,7 @@ class App {
         };
 
         try {
-            const { PlayerService } = await import('../modules/core/services/player.service.js');
+            const { PlayerService } = await import('../core/services/player.service.js');
             const data = await PlayerService.getPlayerData(tag);
             
             const total3v3 = data['3vs3Victories'] || 0;

@@ -46,6 +46,26 @@ export async function onRequest(context) {
 
         const data = await response.json();
 
+        if (context.env.DB && data && data.tag) {
+            context.waitUntil((async () => {
+                try {
+                    await context.env.DB.prepare(
+                        `INSERT INTO player_history (player_tag, player_name, trophies, highest_trophies, victories_3v3, victories_solo, victories_duo) VALUES (?, ?, ?, ?, ?, ?, ?)`
+                    ).bind(
+                        data.tag, 
+                        data.name, 
+                        data.trophies, 
+                        data.highestTrophies || null, 
+                        data['3vs3Victories'] || 0, 
+                        data.soloVictories || 0, 
+                        data.duoVictories || 0
+                    ).run();
+                } catch (e) {
+                    console.error("D1 Error:", e);
+                }
+            })());
+        }
+
         return new Response(JSON.stringify(data), {
             status: response.status,
             headers: {

@@ -31,12 +31,33 @@ export async function onRequest(context) {
                 'Accept': 'application/json'
             },
             cf: {
-                cacheTtl: 18000,
+                cacheTtl: 7200,
                 cacheEverything: true
             }
         });
 
         const data = await response.json();
+
+        if (context.env.DB && data && data.tag) {
+            context.waitUntil((async () => {
+                try {
+                    await context.env.DB.prepare(
+                        `INSERT INTO clan_history (clan_tag, clan_name, total_trophies, member_count, required_trophies) VALUES (?, ?, ?, ?, ?)`
+                    ).bind(data.tag, data.name, data.trophies, data.members ? data.members.length : 0, data.requiredTrophies || 0).run();
+                    
+                    if (Array.isArray(data.members)) {
+                        const stmts = data.members.map(m => 
+                            context.env.DB.prepare(
+                                `INSERT INTO player_history (player_tag, player_name, trophies) VALUES (?, ?, ?)`
+                            ).bind(m.tag, m.name, m.trophies)
+                        );
+                        await context.env.DB.batch(stmts);
+                    }
+                } catch (e) {
+                    console.error("D1 Error:", e);
+                }
+            })());
+        }
 
         return new Response(JSON.stringify(data), {
             status: response.status,
@@ -44,7 +65,7 @@ export async function onRequest(context) {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Cache-Control': 'public, max-age=18000, s-maxage=18000, stale-while-revalidate=3600'
+                'Cache-Control': 'public, max-age=7200, s-maxage=7200, stale-while-revalidate=3600'
             }
         });
     } catch (error) {

@@ -1,13 +1,18 @@
-# The Eminence - Brawl Stars Clan API
+# The Eminence - Brawl Stars Tracker
 
-Backend serverless en **Cloudflare Pages** para consultar estadísticas y conteo de miembros del clan en tiempo real.
+Plataforma web para monitorear las estadísticas y la progresión de la familia de clanes "The Eminence" en Brawl Stars.
 
 ## Características
-- **Seguridad:** API Key protegida en variables de entorno de Cloudflare.
-- **Caché:** CDN Edge Cache de 5 horas (`Cache-Control: public, max-age=18000`).
-- **Proxy:** Conexión a través del proxy de RoyaleAPI.
 
-## Uso del Endpoint
-```http
-GET https://the-eminence.pages.dev/getClan?tag=80L9UYGQG
-```
+- **Estadísticas del Clan:** Seguimiento de trofeos totales y listado de miembros actualizado.
+- **Perfiles de Jugadores:** Visualización detallada del progreso de cada miembro, incluyendo récord de copas, nivel de XP y victorias.
+- **Gráficas de Evolución:** Historial interactivo para ver el progreso del clan y los jugadores a lo largo del tiempo.
+- **Tarjetas Compartibles:** Generación de tarjetas gráficas exportables con las estadísticas de cada jugador.
+- **Soporte Multi-Clan:** Interfaz para navegar entre el clan principal y el Clan 2.
+
+## Stack Tecnológico
+
+- **Frontend:** HTML, CSS y Vanilla JavaScript.
+- **Backend:** Cloudflare Pages y Cloudflare Workers (Serverless).
+- **Base de Datos:** Cloudflare D1.
+- **Librerías:** Chart.js y html2canvas.

@@ -60,6 +60,11 @@
     --radius-md: 8px;
     --radius-lg: 16px;
     
+    /* Aliases & Defaults */
+    --bg-primary: var(--bg-main);
+    --bg-card: var(--bg-secondary);
+    --text-primary: var(--text-main);
+    
     /* Fonts */
     --font-main: 'Outfit', system-ui, sans-serif;
 }
