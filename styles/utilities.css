@@ -32,11 +32,11 @@
     background: linear-gradient(
         115deg,
         #ffffff 0%,
-        #ffffff 25%,
-        var(--accent-neon) 45%,
-        #ffffff 50%,
-        var(--accent-neon) 55%,
-        #ffffff 75%,
+        #ffffff 42%,
+        #80f2ff 48%,
+        var(--accent-neon) 50%,
+        #80f2ff 52%,
+        #ffffff 58%,
         #ffffff 100%
     );
     background-size: 200% 100%;
@@ -52,11 +52,11 @@
     background: linear-gradient(
         115deg,
         #ffffff 0%,
-        #ffffff 25%,
-        var(--accent-purple) 45%,
-        #ffffff 50%,
-        var(--accent-purple) 55%,
-        #ffffff 75%,
+        #ffffff 42%,
+        #ea9beb 48%,
+        var(--accent-purple) 50%,
+        #ea9beb 52%,
+        #ffffff 58%,
         #ffffff 100%
     );
     background-size: 200% 100%;
