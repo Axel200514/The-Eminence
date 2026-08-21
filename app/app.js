@@ -1,7 +1,7 @@
 import { ClanService } from '../modules/core/services/clan.service.js';
 import { HistoryService } from '../modules/core/services/history.service.js';
 import { ChartManager } from '../modules/shared/utils/chart.js';
-import { formatNumber, formatRole, getRoleBadgeClass } from '../modules/shared/utils/formatters.js';
+import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl } from '../modules/shared/utils/formatters.js';
 
 class App {
     constructor() {
@@ -158,6 +158,12 @@ class App {
             card.addEventListener('click', () => this.openPlayerProfile(member.tag));
             
             clone.querySelector('.member-rank').textContent = `#${index + 1}`;
+            
+            const avatar = clone.querySelector('.member-avatar');
+            const iconId = member.icon ? member.icon.id : null;
+            avatar.src = getProfileIconUrl(iconId);
+            avatar.onerror = () => { avatar.src = getProfileIconUrl('28000000'); };
+
             clone.querySelector('.member-name').textContent = member.name;
             clone.querySelector('.member-tag').textContent = member.tag;
             clone.querySelector('.member-trophies').textContent = formatNumber(member.trophies);
@@ -224,7 +230,8 @@ class App {
             const totalSolo = data.soloVictories || 0;
             const totalDuo = data.duoVictories || 0;
             const totalWins = total3v3 + totalSolo + totalDuo;
-            const hoursSpent = Math.floor((totalWins * 2.5) / 60);
+            const totalMatchesEstimated = totalWins * 2;
+            const hoursSpent = Math.floor((totalMatchesEstimated * 2.5) / 60);
 
             document.getElementById('sc-name').textContent = data.name;
             document.getElementById('sc-tag').textContent = data.tag;
@@ -258,6 +265,17 @@ class App {
             };
             document.getElementById('player-name').textContent = data.name;
             document.getElementById('player-tag').textContent = data.tag;
+            
+            const modalIcon = document.getElementById('player-modal-icon');
+            if (modalIcon) {
+                if (data.icon && data.icon.id) {
+                    modalIcon.src = getProfileIconUrl(data.icon.id);
+                    modalIcon.onerror = () => { modalIcon.src = getProfileIconUrl('28000000'); };
+                    modalIcon.style.display = 'block';
+                } else {
+                    modalIcon.style.display = 'none';
+                }
+            }
             
             document.getElementById('player-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('player-highest-trophies').textContent = formatNumber(data.highestTrophies);

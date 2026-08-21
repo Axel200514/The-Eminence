@@ -7,15 +7,15 @@
 
     <link rel="stylesheet" href="../../styles/variables.css?v=2.0.3">
     <link rel="stylesheet" href="../../styles/reset.css?v=2.0.3">
-    <link rel="stylesheet" href="../../styles/layout.css?v=2.0.6">
-    <link rel="stylesheet" href="../../styles/utilities.css?v=2.0.3">
+    <link rel="stylesheet" href="../../styles/layout.css?v=2.0.10">
+    <link rel="stylesheet" href="../../styles/utilities.css?v=2.0.7">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <header class="app-navbar">
         <div class="navbar-container">
-            <div class="nav-brand text-gradient">THE EMINENCE</div>
+            <div class="nav-brand text-shimmer-purple text-shimmer-reverse">THE EMINENCE</div>
             <div class="nav-status">
                 <span class="status-dot"></span>
                 <span>API Live (2h Cache)</span>
@@ -37,35 +37,35 @@
 
         <section id="state-content" class="hidden">
             <div class="glass-panel clan-header-card">
-                <h1 id="clan-name" class="clan-main-title text-gradient">The Eminence</h1>
+                <h1 id="clan-name" class="clan-main-title text-shimmer">The Eminence</h1>
                 <div id="clan-tag" class="clan-tag-badge">#2CGG8Y229</div>
                 <p id="clan-desc" class="clan-description-text"></p>
             </div>
 
             <div class="grid-stats">
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"/></svg></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-gold"><img src="../../styles/Icons/trophy.png" alt="Copas Totales" class="stat-icon-asset"></div>
                     <div>
                         <div class="stat-label">Copas Totales</div>
                         <div id="total-trophies" class="stat-value text-gold">0</div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-blue"><img src="../../styles/Icons/members.webp" alt="Miembros" class="stat-icon-asset"></div>
                     <div>
                         <div class="stat-label">Miembros</div>
                         <div id="member-count" class="stat-value text-neon">0 / 30</div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z"/></svg></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-gold"><img src="../../styles/Icons/President.png" alt="Presidente" class="stat-icon-asset"></div>
                     <div>
                         <div class="stat-label">Presidente</div>
                         <div id="president-name" class="stat-value"></div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-neon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-neon"><img src="../../styles/Icons/Requeriments.png" alt="Copas Requeridas" class="stat-icon-asset"></div>
                     <div>
                         <div class="stat-label">Copas Requeridas</div>
                         <div id="required-trophies" class="stat-value text-purple">0</div>
@@ -106,7 +106,7 @@
             <div class="member-rank"></div>
             <div class="member-info">
                 <div class="member-header">
-                    <span class="member-name"></span>
+                    <div class="member-name-container"><img class="member-avatar" alt="Icon" loading="lazy" decoding="async" src="" /><span class="member-name"></span></div>
                     <span class="badge member-role-badge"></span>
                 </div>
                 <div class="member-details">
@@ -133,8 +133,11 @@
 
             <div id="modal-body" class="hidden">
                 <div class="player-hero">
+                    <img id="player-modal-icon" src="" alt="Icon" class="player-modal-profile-icon" style="display: none;">
                     <div class="player-hero-info">
-                        <h2 id="player-name" class="player-name text-neon margin-0"></h2>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <h2 id="player-name" class="player-name text-neon margin-0"></h2>
+                        </div>
                         <div class="player-meta-row">
                             <span id="player-tag" class="player-tag-badge"></span>
                             <button id="capture-btn" class="btn-share-compact" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span class="btn-share-text">Tarjeta Gráfica</span></button>
@@ -145,63 +148,63 @@
                 <h3 class="section-title text-green">PLAYER STATS</h3>
                 <div class="player-stats-grid">
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="../../styles/Icons/trophy.png" alt="Copas Actuales" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-trophies"></div>
                             <div class="stat-label">Copas Actuales</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4h20v2H2z"/><path d="M2 8l4 12h12l4-12-5 3-5-7-5 7z"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="../../styles/Icons/Record_Trophy.png" alt="Récord Copas" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-highest-trophies"></div>
                             <div class="stat-label">Récord Copas</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-neon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-neon"><img src="../../styles/Icons/exp-level.png" alt="Nivel de XP" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-neon" id="player-level"></div>
                             <div class="stat-label">Nivel de XP</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-neon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-neon"><img src="../../styles/Icons/xp_points.webp" alt="Puntos XP" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-neon" id="player-xp-points"></div>
                             <div class="stat-label">Puntos XP</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3H6L17.5 14.5M13 19L19 13L21 15L15 21ZM16 16L19 19"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="../../styles/Icons/Total_win.webp" alt="Victorias Totales" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-total-wins"></div>
                             <div class="stat-label">Victorias Totales</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-purple"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-purple"><img src="../../styles/Icons/clock.gif" alt="Horas Jugadas" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-purple" id="player-hours"></div>
                             <div class="stat-label">Horas Jugadas</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-red"><img src="../../styles/Icons/3v3.webp" alt="Victorias 3v3" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-red" id="player-3v3-wins"></div>
                             <div class="stat-label">Victorias 3v3</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-green"><img src="../../styles/Icons/solo.png" alt="Victorias Solo" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-green" id="player-solo-wins"></div>
                             <div class="stat-label">Victorias Solo</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                        <div class="stat-icon-svg stat-icon-blue"><img src="../../styles/Icons/duo.png" alt="Victorias Dúo" class="stat-icon-asset"></div>
                         <div>
                             <div class="stat-value text-blue" id="player-duo-wins"></div>
                             <div class="stat-label">Victorias Dúo</div>
@@ -226,18 +229,22 @@
                 <div class="progression-container glass-panel">
                     <div class="progression-stats">
                         <div class="prog-stat">
+                            <img src="../../styles/Icons/unlocked.webp" alt="Brawlers" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
                             <span class="prog-value text-neon" id="prog-brawlers"></span>
                             <span class="prog-label">Brawlers Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
+                            <img src="../../styles/Icons/star_power.webp" alt="Starpowers" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
                             <span class="prog-value text-gold" id="prog-starpowers"></span>
                             <span class="prog-label">Estelares Desbloqueadas</span>
                         </div>
                         <div class="prog-stat">
+                            <img src="../../styles/Icons/gadget.webp" alt="Gadgets" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
                             <span class="prog-value text-green" id="prog-gadgets"></span>
                             <span class="prog-label">Gadgets Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
+                            <img src="../../styles/Icons/gear.webp" alt="Gears" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
                             <span class="prog-value text-purple" id="prog-gears"></span>
                             <span class="prog-label">Gears Desbloqueados</span>
                         </div>
@@ -277,15 +284,15 @@
                 </div>
             </div>
             <div class="sc-grid">
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"/><path d="M6 4h12v7a6 6 0 0 1-12 0V4z"/></svg></div><div><div class="sc-val" id="sc-trophies">0</div><div class="sc-lbl">Copas Actuales</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4h20v2H2z"/><path d="M2 8l4 12h12l4-12-5 3-5-7-5 7z"/></svg></div><div><div class="sc-val" id="sc-highest">0</div><div class="sc-lbl">Récord Copas</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><div class="sc-val" id="sc-level">0</div><div class="sc-lbl">Nivel de XP</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L14.5 8.5L21 11L14.5 13.5L12 20L9.5 13.5L3 11L9.5 8.5L12 2Z"/></svg></div><div><div class="sc-val" id="sc-xp">0</div><div class="sc-lbl">Puntos XP</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3H6L17.5 14.5M13 19L19 13L21 15L15 21ZM16 16L19 19"/></svg></div><div><div class="sc-val" id="sc-total-wins">0</div><div class="sc-lbl">Victorias Totales</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-purple"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="sc-val" id="sc-hours">0</div><div class="sc-lbl">Horas Jugadas</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><div><div class="sc-val" id="sc-3v3">0</div><div class="sc-lbl">Victorias 3v3</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="sc-val" id="sc-solo">0</div><div class="sc-lbl">Victorias Solo</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="sc-val" id="sc-duo">0</div><div class="sc-lbl">Victorias Dúo</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="../../styles/Icons/trophy.png" alt="Copas Actuales" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-trophies">0</div><div class="sc-lbl">Copas Actuales</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="../../styles/Icons/Record_Trophy.png" alt="Récord Copas" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-highest">0</div><div class="sc-lbl">Récord Copas</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="../../styles/Icons/exp-level.png" alt="Nivel de XP" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-level">0</div><div class="sc-lbl">Nivel de XP</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="../../styles/Icons/xp_points.webp" alt="Puntos XP" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-xp">0</div><div class="sc-lbl">Puntos XP</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="../../styles/Icons/Total_win.webp" alt="Victorias Totales" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-total-wins">0</div><div class="sc-lbl">Victorias Totales</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-purple"><img src="../../styles/Icons/clock.gif" alt="Horas Jugadas" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-hours">0</div><div class="sc-lbl">Horas Jugadas</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-red"><img src="../../styles/Icons/3v3.webp" alt="Victorias 3v3" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-3v3">0</div><div class="sc-lbl">Victorias 3v3</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-green"><img src="../../styles/Icons/solo.png" alt="Victorias Solo" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-solo">0</div><div class="sc-lbl">Victorias Solo</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-blue"><img src="../../styles/Icons/duo.png" alt="Victorias Dúo" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-duo">0</div><div class="sc-lbl">Victorias Dúo</div></div></div>
             </div>
             <div class="sc-footer">THE EMINENCE STATS</div>
         </div>

@@ -19,6 +19,59 @@
     text-transform: uppercase;
 }
 
+@keyframes textShimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0% 0;
+    }
+}
+
+.text-shimmer {
+    background: linear-gradient(
+        115deg,
+        #ffffff 0%,
+        #ffffff 25%,
+        var(--accent-neon) 45%,
+        #ffffff 50%,
+        var(--accent-neon) 55%,
+        #ffffff 75%,
+        #ffffff 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 1));
+    animation: textShimmer 3s ease-in-out infinite alternate;
+}
+
+.text-shimmer-purple {
+    background: linear-gradient(
+        115deg,
+        #ffffff 0%,
+        #ffffff 25%,
+        var(--accent-purple) 45%,
+        #ffffff 50%,
+        var(--accent-purple) 55%,
+        #ffffff 75%,
+        #ffffff 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 1));
+    animation: textShimmer 3s ease-in-out infinite alternate;
+}
+
+.text-shimmer-reverse {
+    animation-direction: alternate-reverse;
+}
+
 .text-gold { color: var(--accent-gold); text-shadow: 1px 1px 0px #000; }
 .text-neon { color: var(--accent-neon); text-shadow: 1px 1px 0px #000; }
 .text-purple { color: var(--accent-purple); text-shadow: 1px 1px 0px #000; }
@@ -28,9 +81,9 @@
 
 .badge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 3px 6px;
     border-radius: var(--radius-sm);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;

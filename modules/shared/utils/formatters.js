@@ -22,3 +22,9 @@ export function getRoleBadgeClass(role) {
     };
     return classes[role] || 'badge-member';
 }
+
+export function getProfileIconUrl(iconId) {
+    const defaultIcon = '28000000';
+    const id = iconId || defaultIcon;
+    return `https://cdn.brawlify.com/profile-icons/regular/${id}.png`;
+}
