@@ -32,6 +32,7 @@ class App {
 
     async init() {
         this.setupEvents();
+        this.setupPodium();
         await this.loadClan();
     }
 
@@ -41,6 +42,108 @@ class App {
         }
         if (this.dom.sortSelect) {
             this.dom.sortSelect.addEventListener('change', () => this.renderMembers());
+        }
+    }
+
+    setupPodium() {
+        const btn = document.getElementById('btn-podium');
+        const modal = document.getElementById('podium-modal');
+        const closeBtn = document.getElementById('close-podium');
+        if (!btn || !modal) return;
+
+        btn.onclick = () => {
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            this.loadPodiumData();
+        };
+
+        closeBtn.onclick = () => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        };
+    }
+
+    async loadPodiumData() {
+        const loading = document.getElementById('podium-loading');
+        const content = document.getElementById('podium-content');
+        const topList = document.getElementById('podium-top');
+        const bottomList = document.getElementById('podium-bottom');
+        
+        loading.classList.remove('hidden');
+        content.classList.add('hidden');
+        topList.innerHTML = '';
+        bottomList.innerHTML = '';
+
+        try {
+            if (!this.clanData || !this.clanData.members) return;
+            const members = this.clanData.members;
+            const tags = members.map(m => m.tag);
+            
+            const history = await HistoryService.getPodium(tags, 7);
+            const historyMap = {};
+            history.forEach(h => historyMap[h.player_tag] = h.old_trophies);
+
+            const results = members.map(m => {
+                const oldTrophies = historyMap[m.tag];
+                const gain = oldTrophies !== undefined ? (m.trophies - oldTrophies) : 0;
+                return { ...m, gain };
+            });
+
+            results.sort((a, b) => b.gain - a.gain);
+            
+            const template = document.getElementById('podium-item-template');
+            if (!template) return;
+
+            const renderItem = (m, rankIcon, rankClass, isGhost = false) => {
+                const clone = template.content.cloneNode(true);
+                const item = clone.querySelector('.podium-item');
+                
+                if (rankClass) item.classList.add(rankClass);
+                if (isGhost) item.classList.add('ghost');
+                
+                clone.querySelector('.p-rank').textContent = rankIcon;
+                clone.querySelector('.p-icon').src = getProfileIconUrl(m.icon?.id);
+                clone.querySelector('.p-name').textContent = m.name;
+                
+                if (isGhost) {
+                    const roleSpan = clone.querySelector('.p-role');
+                    roleSpan.textContent = `(${formatRole(m.role)})`;
+                    roleSpan.classList.remove('hidden');
+                }
+
+                const gainSign = m.gain > 0 ? '+' : '';
+                const gainClass = m.gain > 0 ? 'positive' : (m.gain < 0 ? 'negative' : 'neutral');
+                const gainEl = clone.querySelector('.p-gain');
+                gainEl.textContent = `${gainSign}${formatNumber(m.gain)} 🏆`;
+                gainEl.classList.add(gainClass);
+
+                return clone;
+            };
+
+            const topFrag = document.createDocumentFragment();
+            results.slice(0, 3).forEach((m, index) => {
+                const rankClass = `rank-${index + 1}`;
+                let rankIcon = '';
+                if (index === 0) rankIcon = '🥇';
+                else if (index === 1) rankIcon = '🥈';
+                else if (index === 2) rankIcon = '🥉';
+                topFrag.appendChild(renderItem(m, rankIcon, rankClass));
+            });
+            topList.appendChild(topFrag);
+
+            const bottomFrag = document.createDocumentFragment();
+            const ghosts = [...results].reverse().filter(m => m.role !== 'president' && m.role !== 'vicePresident');
+            ghosts.slice(0, 5).forEach((m) => {
+                bottomFrag.appendChild(renderItem(m, '👻', null, true));
+            });
+            bottomList.appendChild(bottomFrag);
+
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+
+        } catch (e) {
+            console.error("Error loading podium:", e);
+            loading.textContent = "Error calculando el podio.";
         }
     }
 
