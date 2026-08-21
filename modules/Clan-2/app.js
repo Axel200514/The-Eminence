@@ -1,4 +1,5 @@
 import { Clan2Service } from './Services/clan-2.service.js';
+import { ClanService } from '../core/services/clan.service.js';
 import { HistoryService } from '../core/services/history.service.js';
 import { ChartManager } from '../shared/utils/chart.js';
 import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl } from '../shared/utils/formatters.js';
@@ -34,6 +35,7 @@ class App {
         this.setupEvents();
         this.setupPodium();
         await this.loadClan();
+        setTimeout(() => this.loadPodiumData(true), 600);
     }
 
     setupEvents() {
@@ -51,100 +53,201 @@ class App {
         const closeBtn = document.getElementById('close-podium');
         if (!btn || !modal) return;
 
+        btn.onmouseenter = () => {
+            if (!this.podiumMembersData && !this.isPodiumLoading) {
+                this.loadPodiumData(true);
+            }
+        };
+
         btn.onclick = () => {
             modal.classList.remove('hidden');
             document.body.classList.add('modal-open');
-            this.loadPodiumData();
+            if (this.podiumMembersData) {
+                document.getElementById('podium-loading').classList.add('hidden');
+                document.getElementById('podium-content').classList.remove('hidden');
+                this.renderPodiumScope();
+            } else {
+                this.loadPodiumData(false);
+            }
         };
 
         closeBtn.onclick = () => {
             modal.classList.add('hidden');
             document.body.classList.remove('modal-open');
         };
+
+        const tabButtons = document.querySelectorAll('#podium-tabs button');
+        tabButtons.forEach(button => {
+            button.onclick = () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                this.currentPodiumScope = button.dataset.scope || 'general';
+                this.renderPodiumScope();
+            };
+        });
     }
 
-    async loadPodiumData() {
+    async loadPodiumData(isBackground = false) {
+        if (this.isPodiumLoading) return;
+        this.isPodiumLoading = true;
+
         const loading = document.getElementById('podium-loading');
         const content = document.getElementById('podium-content');
-        const topList = document.getElementById('podium-top');
-        const bottomList = document.getElementById('podium-bottom');
         
-        loading.classList.remove('hidden');
-        content.classList.add('hidden');
-        topList.innerHTML = '';
-        bottomList.innerHTML = '';
+        if (!isBackground) {
+            loading.classList.remove('hidden');
+            content.classList.add('hidden');
+        }
 
         try {
-            if (!this.clanData || !this.clanData.members) return;
-            const members = this.clanData.members;
-            const tags = members.map(m => m.tag);
-            
-            const history = await HistoryService.getPodium(tags, 7);
+            const [clan1Data, clan2Data] = await Promise.all([
+                ClanService.getClanData('80L9UYGQG').catch(() => null),
+                ClanService.getClanData('2CGG8Y229').catch(() => null)
+            ]);
+
+            const clan1Members = (clan1Data?.members || []).map(m => ({ ...m, clanName: clan1Data?.name || 'The Eminence', clanScope: 'clan1' }));
+            const clan2Members = (clan2Data?.members || []).map(m => ({ ...m, clanName: clan2Data?.name || 'The Eminence 2', clanScope: 'clan2' }));
+
+            const allMembers = [...clan1Members, ...clan2Members];
+            const allTags = allMembers.map(m => m.tag);
+
+            if (allTags.length === 0) {
+                if (!isBackground) loading.textContent = "No se pudieron obtener datos de los clanes.";
+                this.isPodiumLoading = false;
+                return;
+            }
+
+            allMembers.forEach(m => {
+                const img = new Image();
+                img.src = getProfileIconUrl(m.icon?.id);
+            });
+
+            const history = await HistoryService.getPodium(allTags, 7);
             const historyMap = {};
             history.forEach(h => historyMap[h.player_tag] = h.old_trophies);
 
-            const results = members.map(m => {
+            this.podiumMembersData = allMembers.map(m => {
                 const oldTrophies = historyMap[m.tag];
                 const gain = oldTrophies !== undefined ? (m.trophies - oldTrophies) : 0;
                 return { ...m, gain };
             });
 
-            results.sort((a, b) => b.gain - a.gain);
-            
-            const template = document.getElementById('podium-item-template');
-            if (!template) return;
-
-            const renderItem = (m, rankIcon, rankClass, isGhost = false) => {
-                const clone = template.content.cloneNode(true);
-                const item = clone.querySelector('.podium-item');
-                
-                if (rankClass) item.classList.add(rankClass);
-                if (isGhost) item.classList.add('ghost');
-                
-                clone.querySelector('.p-rank').textContent = rankIcon;
-                clone.querySelector('.p-icon').src = getProfileIconUrl(m.icon?.id);
-                clone.querySelector('.p-name').textContent = m.name;
-                
-                if (isGhost) {
-                    const roleSpan = clone.querySelector('.p-role');
-                    roleSpan.textContent = `(${formatRole(m.role)})`;
-                    roleSpan.classList.remove('hidden');
-                }
-
-                const gainSign = m.gain > 0 ? '+' : '';
-                const gainClass = m.gain > 0 ? 'positive' : (m.gain < 0 ? 'negative' : 'neutral');
-                const gainEl = clone.querySelector('.p-gain');
-                gainEl.textContent = `${gainSign}${formatNumber(m.gain)} 🏆`;
-                gainEl.classList.add(gainClass);
-
-                return clone;
-            };
-
-            const topFrag = document.createDocumentFragment();
-            results.slice(0, 3).forEach((m, index) => {
-                const rankClass = `rank-${index + 1}`;
-                let rankIcon = '';
-                if (index === 0) rankIcon = '🥇';
-                else if (index === 1) rankIcon = '🥈';
-                else if (index === 2) rankIcon = '🥉';
-                topFrag.appendChild(renderItem(m, rankIcon, rankClass));
-            });
-            topList.appendChild(topFrag);
-
-            const bottomFrag = document.createDocumentFragment();
-            const ghosts = [...results].reverse().filter(m => m.role !== 'president' && m.role !== 'vicePresident');
-            ghosts.slice(0, 5).forEach((m) => {
-                bottomFrag.appendChild(renderItem(m, '👻', null, true));
-            });
-            bottomList.appendChild(bottomFrag);
+            this.currentPodiumScope = this.currentPodiumScope || 'general';
+            this.renderPodiumScope();
 
             loading.classList.add('hidden');
             content.classList.remove('hidden');
-
         } catch (e) {
             console.error("Error loading podium:", e);
-            loading.textContent = "Error calculando el podio.";
+            if (!isBackground) loading.textContent = "Error calculando el podio.";
+        } finally {
+            this.isPodiumLoading = false;
         }
+    }
+
+    renderPodiumScope() {
+        if (!this.podiumMembersData) return;
+        const scope = this.currentPodiumScope || 'general';
+        const topList = document.getElementById('podium-top');
+        const bottomList = document.getElementById('podium-bottom');
+        const titleEl = document.getElementById('podium-scope-title');
+        const topTemplate = document.getElementById('podium-top-template');
+        const listTemplate = document.getElementById('podium-item-template');
+        if (!topList || !bottomList || !topTemplate || !listTemplate) return;
+
+        topList.replaceChildren();
+        bottomList.replaceChildren();
+
+        let filtered = [...this.podiumMembersData];
+        if (scope === 'clan1') {
+            filtered = filtered.filter(m => m.clanScope === 'clan1');
+            if (titleEl) titleEl.textContent = '🥇 SALÓN DE LA FAMA (CLAN 1)';
+        } else if (scope === 'clan2') {
+            filtered = filtered.filter(m => m.clanScope === 'clan2');
+            if (titleEl) titleEl.textContent = '🥇 SALÓN DE LA FAMA (CLAN 2)';
+        } else {
+            if (titleEl) titleEl.textContent = '🥇 SALÓN DE LA FAMA (GENERAL)';
+        }
+
+        filtered.sort((a, b) => b.gain - a.gain);
+
+        const renderListItem = (m, rankIcon, rankClass, isGhost = false) => {
+            const clone = listTemplate.content.cloneNode(true);
+            const item = clone.querySelector('.podium-item');
+            
+            if (rankClass) item.classList.add(rankClass);
+            if (isGhost) item.classList.add('ghost');
+            
+            clone.querySelector('.p-rank').textContent = rankIcon;
+            
+            const icon = clone.querySelector('.p-icon');
+            icon.src = getProfileIconUrl(m.icon?.id);
+            icon.onerror = () => { icon.src = getProfileIconUrl('28000000'); };
+
+            clone.querySelector('.p-name').textContent = m.name;
+            clone.querySelector('.p-clan-badge').textContent = m.clanName;
+            clone.querySelector('.p-role').textContent = `• ${formatRole(m.role)}`;
+
+            const gainSign = m.gain > 0 ? '+' : '';
+            const gainClass = m.gain > 0 ? 'positive' : (m.gain < 0 ? 'negative' : 'neutral');
+            const gainEl = clone.querySelector('.p-gain');
+            gainEl.classList.add(gainClass);
+            clone.querySelector('.p-gain-value').textContent = `${gainSign}${formatNumber(m.gain)}`;
+
+            item.addEventListener('click', () => {
+                document.getElementById('podium-modal').classList.add('hidden');
+                this.openPlayerProfile(m.tag);
+            });
+
+            return clone;
+        };
+
+        const renderTopItem = (m, rankNum) => {
+            const clone = topTemplate.content.cloneNode(true);
+            const step = clone.querySelector('.podium-step');
+            step.classList.add(`rank-${rankNum}`);
+            
+            if (rankNum === 1) {
+                const crown = clone.querySelector('.podium-crown');
+                if (crown) crown.classList.remove('hidden');
+            }
+
+            clone.querySelector('.podium-player-name').textContent = m.name;
+            clone.querySelector('.podium-player-clan').textContent = m.clanName;
+            
+            const avatar = clone.querySelector('.podium-avatar');
+            avatar.src = getProfileIconUrl(m.icon?.id);
+            avatar.onerror = () => { avatar.src = getProfileIconUrl('28000000'); };
+
+            clone.querySelector('.podium-base').textContent = rankNum;
+
+            const gainSign = m.gain > 0 ? '+' : '';
+            const gainClass = m.gain > 0 ? 'positive' : (m.gain < 0 ? 'negative' : 'neutral');
+            const gainEl = clone.querySelector('.podium-player-gain');
+            gainEl.classList.add(gainClass);
+            clone.querySelector('.p-gain-value').textContent = `${gainSign}${formatNumber(m.gain)}`;
+
+            step.addEventListener('click', () => {
+                document.getElementById('podium-modal').classList.add('hidden');
+                this.openPlayerProfile(m.tag);
+            });
+
+            return clone;
+        };
+
+        const topFrag = document.createDocumentFragment();
+        const top3 = filtered.slice(0, 3);
+        if (top3[1]) topFrag.appendChild(renderTopItem(top3[1], 2));
+        if (top3[0]) topFrag.appendChild(renderTopItem(top3[0], 1));
+        if (top3[2]) topFrag.appendChild(renderTopItem(top3[2], 3));
+        topList.appendChild(topFrag);
+
+        const bottomFrag = document.createDocumentFragment();
+        const ghosts = [...filtered].reverse();
+        ghosts.slice(0, 6).forEach((m) => {
+            bottomFrag.appendChild(renderListItem(m, '👻', null, true));
+        });
+        bottomList.appendChild(bottomFrag);
     }
 
     async loadClan() {

@@ -7,9 +7,8 @@
 
     <link rel="stylesheet" href="styles/variables.css?v=2.0.3">
     <link rel="stylesheet" href="styles/reset.css?v=2.0.3">
-    <link rel="stylesheet" href="styles/layout.css?v=2.0.10">
+    <link rel="stylesheet" href="styles/layout.css?v=2.0.15">
     <link rel="stylesheet" href="styles/utilities.css?v=2.0.8">
-    <link rel="stylesheet" href="styles/podium.css?v=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -274,41 +273,75 @@
         </div>
     </template>
 
-    <script type="module" src="app/app.js?v=2.0.7"></script>
-
-    
+    <script type="module" src="app/app.js?v=2.0.11"></script>
 
     <a href="./modules/Clan-2/index.html" class="floating-clan-btn"><span class="btn-text"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Ir al Clan 2</span><span class="btn-short-text">Clan 2 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-left: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></a>
     
     <div id="btn-podium" class="floating-podium-btn"><span class="btn-text">👑 Podio & Fantasmas</span><span class="btn-short-text">👑 Podio</span></div>
 
-    <!-- Podium Modal -->
     <div id="podium-modal" class="modal-overlay hidden">
-        <div class="modal-content podium-modal-content">
+        <div class="modal-content glass-panel podium-modal-content">
             <button id="close-podium" class="modal-close">&times;</button>
-            <h2 class="section-title text-gold" style="margin-bottom: 20px;">🏆 Rendimiento Semanal (Clan 1)</h2>
-            <div id="podium-loading" class="text-center text-muted" style="padding: 40px 0;">Calculando diferencias...</div>
+            <div class="podium-header-banner">
+                <div>
+                    <h2 class="section-title text-gold margin-0">🏆 RENDIMIENTO SEMANAL</h2>
+                </div>
+                <div class="podium-tabs" id="podium-tabs">
+                    <button class="badge active" data-scope="general">👑 General</button>
+                    <button class="badge" data-scope="clan1">Clan 1</button>
+                    <button class="badge" data-scope="clan2">Clan 2</button>
+                </div>
+            </div>
+            <div id="podium-loading" class="podium-loading-state">Calculando estadísticas...</div>
             <div id="podium-content" class="hidden">
-                <h3 class="text-neon" style="margin-top:0;">🥇 Top Pushers (Más copas)</h3>
-                <div id="podium-top" class="podium-list"></div>
-                <h3 class="text-red" style="margin-top:30px;">👻 Fantasmones (Menos copas o negativos)</h3>
-                <p class="text-muted text-small" style="margin-top: -10px;">Excluye a Líderes y Colíderes</p>
+                <div class="podium-showcase">
+                    <div class="podium-showcase-title">
+                        <span class="text-neon font-bold" id="podium-scope-title">🥇 SALÓN DE LA FAMA (GENERAL)</span>
+                    </div>
+                    <div id="podium-top" class="podium-stand"></div>
+                </div>
+
+                <div class="fantasmones-header">
+                    <h3 class="text-red font-bold margin-0">👻 ZONA DE FANTASMONES</h3>
+                    <span class="text-muted text-small">Menor aporte en copas (7 días)</span>
+                </div>
                 <div id="podium-bottom" class="podium-list"></div>
             </div>
         </div>
     </div>
     
+    <template id="podium-top-template">
+        <div class="podium-step">
+            <div class="podium-crown hidden">👑</div>
+            <div class="podium-player-name"></div>
+            <div class="podium-player-clan"></div>
+            <div class="podium-player-gain">
+                <span class="p-gain-value"></span>
+                <img src="styles/Icons/trophy.png" alt="🏆" class="podium-trophy-asset">
+            </div>
+            <img class="podium-avatar" src="" alt="Icon" loading="lazy">
+            <div class="podium-base"></div>
+        </div>
+    </template>
+
     <template id="podium-item-template">
         <div class="podium-item">
             <div class="p-rank"></div>
-            <img class="p-icon" src="" alt="Icon" width="30" style="border-radius:50%;">
+            <img class="p-icon" src="" alt="Icon" width="38" height="38" loading="lazy">
             <div class="p-name-container">
-                <span class="p-name"></span>
-                <span class="p-role text-muted text-small hidden"></span>
+                <div class="p-name"></div>
+                <div class="p-sub-info">
+                    <span class="p-clan-badge"></span>
+                    <span class="p-role text-muted"></span>
+                </div>
             </div>
-            <div class="p-gain"></div>
+            <div class="p-gain">
+                <span class="p-gain-value"></span>
+                <img src="styles/Icons/trophy.png" alt="🏆" class="podium-trophy-asset">
+            </div>
         </div>
     </template>
+
     <div class="share-card-wrapper">
         <div id="share-card" class="share-card">
             <div class="sc-header">
