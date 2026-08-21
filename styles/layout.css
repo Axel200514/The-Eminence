@@ -985,3 +985,23 @@ body.modal-open .floating-clan-btn {
     filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
 }
 
+
+/* Brawler Card Avatar Updates */
+.brawler-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+}
+.brawler-avatar {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+}
+.brawler-info {
+    flex: 1;
+    min-width: 0;
+}

@@ -1,7 +1,7 @@
 import { ClanService } from '../modules/core/services/clan.service.js';
 import { HistoryService } from '../modules/core/services/history.service.js';
 import { ChartManager } from '../modules/shared/utils/chart.js';
-import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl } from '../modules/shared/utils/formatters.js';
+import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl } from '../modules/shared/utils/formatters.js';
 
 class App {
     constructor() {
@@ -313,6 +313,8 @@ class App {
             
             brawlers.sort((a, b) => b.trophies - a.trophies).slice(0, 8).forEach(brawler => {
                 const clone = brawlerTemplate.content.cloneNode(true);
+                const icon = clone.querySelector('.brawler-avatar');
+                if (icon) icon.src = getBrawlerIconUrl(brawler.id);
                 clone.querySelector('.brawler-name').textContent = brawler.name;
                 clone.querySelector('.brawler-power').textContent = `Fuerza ${brawler.power}`;
                 clone.querySelector('.brawler-trophies').textContent = formatNumber(brawler.trophies);

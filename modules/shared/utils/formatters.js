@@ -28,3 +28,8 @@ export function getProfileIconUrl(iconId) {
     const id = iconId || defaultIcon;
     return `https://cdn.brawlify.com/profile-icons/regular/${id}.png`;
 }
+
+export function getBrawlerIconUrl(brawlerId) {
+    if (!brawlerId) return '';
+    return `https://cdn.brawlify.com/brawlers/borderless/${brawlerId}.png`;
+}
