@@ -7,8 +7,8 @@
 
     <link rel="stylesheet" href="../../styles/variables.css?v=2.0.3">
     <link rel="stylesheet" href="../../styles/reset.css?v=2.0.3">
-    <link rel="stylesheet" href="../../styles/layout.css?v=2.0.15">
-    <link rel="stylesheet" href="../../styles/utilities.css?v=2.0.8">
+    <link rel="stylesheet" href="../../styles/layout.css?v=2.0.18">
+    <link rel="stylesheet" href="../../styles/utilities.css?v=2.0.9">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -83,7 +83,7 @@
                         <button data-days="9999" class="badge badge-senior cursor-pointer">Todo</button>
                     </div>
                 </div>
-                <div style="position: relative; height: 120px; width: 100%;">
+                <div class="chart-container-sm">
                     <canvas id="clan-chart"></canvas>
                 </div>
             </div>
@@ -95,12 +95,23 @@
                     <option value="trophies-asc">Menor a mayor copas</option>
                     <option value="name-asc">Nombre (A-Z)</option>
                 </select>
-                <button id="export-btn" class="retry-btn" style="margin-top:0; padding: 10px 16px; display: flex; align-items: center; gap: 8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</button>
+                <button id="export-btn" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</button>
             </div>
 
             <div id="members-list" class="grid-members"></div>
         </section>
     </main>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p class="footer-text">© <span class="copyright-year">2026</span> The Eminence • Tracker no oficial de Brawl Stars</p>
+            <div class="footer-links">
+                <a href="../../legal.html" class="footer-link">Términos y Privacidad</a>
+                <span class="footer-sep">•</span>
+                <a href="https://github.com/Axel200514" target="_blank" rel="noopener noreferrer" class="footer-link">About Me</a>
+            </div>
+        </div>
+    </footer>
 
     <template id="member-template">
         <div class="glass-panel member-card">
@@ -134,14 +145,14 @@
 
             <div id="modal-body" class="hidden">
                 <div class="player-hero">
-                    <img id="player-modal-icon" src="" alt="Icon" class="player-modal-profile-icon" style="display: none;">
+                    <img id="player-modal-icon" src="" alt="Icon" class="player-modal-profile-icon hidden">
                     <div class="player-hero-info">
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="flex items-center gap-3">
                             <h2 id="player-name" class="player-name text-neon margin-0"></h2>
                         </div>
                         <div class="player-meta-row">
                             <span id="player-tag" class="player-tag-badge"></span>
-                            <button id="capture-btn" class="btn-share-compact" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span class="btn-share-text">Tarjeta Gráfica</span></button>
+                            <button id="capture-btn" class="btn-share-compact hidden"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span class="btn-share-text">Tarjeta Gráfica</span></button>
                         </div>
                     </div>
                 </div>
@@ -222,7 +233,7 @@
                     </div>
                 </h3>
                 <div class="glass-panel player-chart-container">
-                    <div style="position: relative; height: 200px; width: 100%;">
+                    <div class="chart-container-lg">
                         <canvas id="player-chart"></canvas>
                     </div>
                 </div>
@@ -230,22 +241,22 @@
                 <div class="progression-container glass-panel">
                     <div class="progression-stats">
                         <div class="prog-stat">
-                            <img src="../../styles/Icons/unlocked.webp" alt="Brawlers" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
+                            <img src="../../styles/Icons/unlocked.webp" alt="Brawlers" class="stat-icon-asset prog-icon">
                             <span class="prog-value text-neon" id="prog-brawlers"></span>
                             <span class="prog-label">Brawlers Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="../../styles/Icons/star_power.webp" alt="Starpowers" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
+                            <img src="../../styles/Icons/star_power.webp" alt="Starpowers" class="stat-icon-asset prog-icon">
                             <span class="prog-value text-gold" id="prog-starpowers"></span>
                             <span class="prog-label">Estelares Desbloqueadas</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="../../styles/Icons/gadget.webp" alt="Gadgets" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
+                            <img src="../../styles/Icons/gadget.webp" alt="Gadgets" class="stat-icon-asset prog-icon">
                             <span class="prog-value text-green" id="prog-gadgets"></span>
                             <span class="prog-label">Gadgets Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="../../styles/Icons/gear.webp" alt="Gears" class="stat-icon-asset" style="width: 32px; height: 32px; margin-bottom: 4px;">
+                            <img src="../../styles/Icons/gear.webp" alt="Gears" class="stat-icon-asset prog-icon">
                             <span class="prog-value text-purple" id="prog-gears"></span>
                             <span class="prog-label">Gears Desbloqueados</span>
                         </div>
@@ -274,11 +285,11 @@
         </div>
     </template>
 
-    <script type="module" src="./app.js?v=2.0.11"></script>
+    <script type="module" src="./app.js?v=2.0.12"></script>
 
     
 
-    <a href="../../index.html" class="floating-clan-btn"><span class="btn-text"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Ir al Clan 1</span><span class="btn-short-text">Clan 1 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-left: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></a>
+    <a href="../../index.html" class="floating-clan-btn"><span class="btn-text"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-mr-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Ir al Clan 1</span><span class="btn-short-text">Clan 1 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-ml-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></a>
     
     <div id="btn-podium" class="floating-podium-btn"><span class="btn-text">👑 Podio & Fantasmas</span><span class="btn-short-text">👑 Podio</span></div>
 
@@ -345,10 +356,59 @@
             </div>
         </div>
     </template>
+    <template id="confetti-template">
+        <div class="confetti-piece"></div>
+    </template>
+
+    <template id="winners-announcement-template">
+        <div class="winner-announcement-overlay">
+            <div class="confetti-container" id="confetti-container"></div>
+            <div class="winner-announcement-content glass-panel all-winners-card">
+                <h2 class="text-gold margin-0 winners-title">🏆 GANADORES DE LA SEMANA 🏆</h2>
+                
+                <div class="winners-list flex-col gap-4">
+                                        <div class="winner-row winner-gold">
+                        <div class="flex items-center gap-2">
+                            <img class="w-gen-avatar winner-avatar" src="" alt="Avatar">
+                            <div class="flex-col text-left">
+                                <span class="winner-label text-gold">GLOBAL</span>
+                                <span class="w-gen-name text-neon winner-name"></span>
+                            </div>
+                        </div>
+                        <span class="w-gen-gain text-green font-bold"></span>
+                    </div>
+
+                                        <div class="winner-row winner-silver">
+                        <div class="flex items-center gap-2">
+                            <img class="w-c1-avatar winner-avatar-sm" src="" alt="Avatar">
+                            <div class="flex-col text-left">
+                                <span class="winner-label text-secondary">CLAN 1</span>
+                                <span class="w-c1-name text-neon winner-name"></span>
+                            </div>
+                        </div>
+                        <span class="w-c1-gain text-green font-bold"></span>
+                    </div>
+
+                                        <div class="winner-row winner-silver">
+                        <div class="flex items-center gap-2">
+                            <img class="w-c2-avatar winner-avatar-sm" src="" alt="Avatar">
+                            <div class="flex-col text-left">
+                                <span class="winner-label text-secondary">CLAN 2</span>
+                                <span class="w-c2-name text-neon winner-name"></span>
+                            </div>
+                        </div>
+                        <span class="w-c2-gain text-green font-bold"></span>
+                    </div>
+                </div>
+                <button class="retry-btn mt-10 close-announcement-btn w-full">Ver Podio</button>
+            </div>
+        </div>
+    </template>
+
     <div class="share-card-wrapper">
         <div id="share-card" class="share-card">
             <div class="sc-header">
-                <div style="display: flex; align-items: baseline; gap: 15px;">
+                <div class="flex items-baseline gap-4">
                     <h1 id="sc-name" class="sc-name">Player</h1>
                     <div id="sc-tag" class="sc-tag">#TAG</div>
                 </div>
@@ -369,3 +429,4 @@
     </div>
 </body>
 </html>
+

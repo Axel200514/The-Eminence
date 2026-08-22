@@ -2,11 +2,12 @@ import { Clan2Service } from './Services/clan-2.service.js';
 import { ClanService } from '../core/services/clan.service.js';
 import { HistoryService } from '../core/services/history.service.js';
 import { ChartManager } from '../shared/utils/chart.js';
-import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl } from '../shared/utils/formatters.js';
+import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, initDynamicYear } from '../shared/utils/formatters.js';
 
 class App {
     constructor() {
         this.clanData = null;
+        this.hasShownWinners = false;
         this.dom = {
             loading: document.getElementById('state-loading'),
             content: document.getElementById('state-content'),
@@ -32,6 +33,7 @@ class App {
     }
 
     async init() {
+        initDynamicYear();
         this.setupEvents();
         this.setupPodium();
         await this.loadClan();
@@ -66,6 +68,7 @@ class App {
                 document.getElementById('podium-loading').classList.add('hidden');
                 document.getElementById('podium-content').classList.remove('hidden');
                 this.renderPodiumScope();
+                this.showAllWinnersAnnouncement();
             } else {
                 this.loadPodiumData(false);
             }
@@ -124,7 +127,18 @@ class App {
 
             const history = await HistoryService.getPodium(allTags, 7);
             const historyMap = {};
-            history.forEach(h => historyMap[h.player_tag] = h.old_trophies);
+            let minRecordTime = Date.now();
+            
+            history.forEach(h => {
+                historyMap[h.player_tag] = h.old_trophies;
+                if (h.oldest_record) {
+                    const t = new Date(h.oldest_record + 'Z').getTime();
+                    if (t < minRecordTime) minRecordTime = t;
+                }
+            });
+            
+            this.daysSinceStart = (Date.now() - minRecordTime) / (1000 * 60 * 60 * 24);
+            this.isWeekCompleted = this.daysSinceStart >= 6.8;
 
             this.podiumMembersData = allMembers.map(m => {
                 const oldTrophies = historyMap[m.tag];
@@ -137,6 +151,11 @@ class App {
 
             loading.classList.add('hidden');
             content.classList.remove('hidden');
+
+            const modal = document.getElementById('podium-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                this.showAllWinnersAnnouncement();
+            }
         } catch (e) {
             console.error("Error loading podium:", e);
             if (!isBackground) loading.textContent = "Error calculando el podio.";
@@ -206,6 +225,7 @@ class App {
             const clone = topTemplate.content.cloneNode(true);
             const step = clone.querySelector('.podium-step');
             step.classList.add(`rank-${rankNum}`);
+            step.classList.add('animate');
             
             if (rankNum === 1) {
                 const crown = clone.querySelector('.podium-crown');
@@ -248,6 +268,89 @@ class App {
             bottomFrag.appendChild(renderListItem(m, '👻', null, true));
         });
         bottomList.appendChild(bottomFrag);
+    }
+
+    showAllWinnersAnnouncement(force = false) {
+        const today = new Date().toISOString().split('T')[0];
+        const storageKey = 'hasShownWinners_' + today;
+        if (!force && (this.hasShownWinners || !this.podiumMembersData || localStorage.getItem(storageKey))) return;
+        this.hasShownWinners = true;
+        localStorage.setItem(storageKey, 'true');
+
+        const template = document.getElementById('winners-announcement-template');
+        if (!template) return;
+        
+        const existing = document.querySelector('.winner-announcement-overlay');
+        if (existing) existing.remove();
+
+        const clone = template.content.cloneNode(true);
+        const overlay = clone.querySelector('.winner-announcement-overlay');
+        
+        const titleEl = clone.querySelector('.winners-title');
+        if (titleEl) {
+            if (!this.isWeekCompleted) {
+                const day = Math.max(1, Math.ceil(this.daysSinceStart || 1));
+                titleEl.textContent = `🔥 LÍDERES ACTUALES (DÍA ${day}/7) 🔥`;
+                titleEl.classList.remove('text-gold');
+                titleEl.classList.add('text-neon');
+            } else {
+                titleEl.textContent = '🏆 GANADORES DE LA SEMANA 🏆';
+            }
+        }
+        
+        const getWinner = (scope) => {
+            let list = [...this.podiumMembersData];
+            if (scope === 'clan1' || scope === 'clan2') {
+                list = list.filter(m => m.clanScope === scope);
+            }
+            return list.sort((a,b) => b.gain - a.gain)[0];
+        };
+
+        const setupRow = (prefix, player) => {
+            if (!player) return;
+            clone.querySelector(`.w-${prefix}-name`).textContent = player.name;
+            clone.querySelector(`.w-${prefix}-gain`).textContent = `+${formatNumber(player.gain)} Copas`;
+            const av = clone.querySelector(`.w-${prefix}-avatar`);
+            av.src = getProfileIconUrl(player.icon?.id);
+            av.onerror = () => { av.src = getProfileIconUrl('28000000'); };
+        };
+
+        setupRow('gen', getWinner('general'));
+        setupRow('c1', getWinner('clan1'));
+        setupRow('c2', getWinner('clan2'));
+
+        const confettiContainer = clone.querySelector('.confetti-container');
+        const confettiTemplate = document.getElementById('confetti-template');
+        if (confettiContainer && confettiTemplate && this.isWeekCompleted) {
+            const colors = ['#ffcf33', '#ff003c', '#009dff', '#00ff66', '#d000ff'];
+            const frag = document.createDocumentFragment();
+            
+            for (let i = 0; i < 50; i++) {
+                const confNode = confettiTemplate.content.cloneNode(true);
+                const conf = confNode.querySelector('.confetti-piece');
+                
+                conf.style.setProperty('--left', Math.random() * 100 + '%');
+                conf.style.setProperty('--bg-color', colors[Math.floor(Math.random() * colors.length)]);
+                conf.style.setProperty('--anim-delay', (Math.random() * 2) + 's');
+                conf.style.setProperty('--anim-dur', (Math.random() * 2 + 2) + 's');
+                
+                frag.appendChild(confNode);
+            }
+            confettiContainer.appendChild(frag);
+        }
+
+        const closeBtn = clone.querySelector('.close-announcement-btn');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                overlay.classList.add('fade-out');
+                setTimeout(() => { if (overlay && overlay.parentNode) overlay.remove(); }, 500);
+            };
+        }
+
+        const modal = document.getElementById('podium-modal');
+        if (modal) {
+            modal.appendChild(clone);
+        }
     }
 
     async loadClan() {
@@ -452,7 +555,7 @@ class App {
             document.getElementById('sc-duo').textContent = formatNumber(totalDuo);
             
             const captureBtn = document.getElementById('capture-btn');
-            captureBtn.style.display = 'inline-flex';
+            captureBtn.classList.remove('hidden');
             captureBtn.onclick = () => {
                 const btnText = captureBtn.querySelector('.btn-share-text');
                 if (btnText) btnText.textContent = 'Generando...';
@@ -477,9 +580,9 @@ class App {
                 if (data.icon && data.icon.id) {
                     modalIcon.src = getProfileIconUrl(data.icon.id);
                     modalIcon.onerror = () => { modalIcon.src = getProfileIconUrl('28000000'); };
-                    modalIcon.style.display = 'block';
+                    modalIcon.classList.remove('hidden');
                 } else {
-                    modalIcon.style.display = 'none';
+                    modalIcon.classList.add('hidden');
                 }
             }
             

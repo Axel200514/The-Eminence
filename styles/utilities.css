@@ -9,6 +9,17 @@
 
 .text-center { text-align: center; }
 .text-right { text-align: right; }
+.text-left { text-align: left; }
+.w-full { width: 100%; }
+
+.chart-container-sm { position: relative; height: 120px; width: 100%; }
+.chart-container-lg { position: relative; height: 200px; width: 100%; }
+
+.btn-export { margin-top: 0; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+
+.prog-icon { width: 32px; height: 32px; margin-bottom: 4px; }
+.icon-mr-4 { vertical-align: middle; margin-right: 4px; }
+.icon-ml-4 { vertical-align: middle; margin-left: 4px; }
 
 .text-gradient {
     background: linear-gradient(135deg, var(--text-main), var(--accent-neon));
@@ -130,5 +141,8 @@
 .retry-btn:hover {
     opacity: 0.9;
 }
+
+.mt-10 { margin-top: 10px; }
+.margin-0 { margin: 0; }
 
 .hidden { display: none !important; }

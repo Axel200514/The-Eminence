@@ -33,3 +33,13 @@ export function getBrawlerIconUrl(brawlerId) {
     if (!brawlerId) return '';
     return `https://cdn.brawlify.com/brawlers/borderless/${brawlerId}.png`;
 }
+
+export function initDynamicYear() {
+    const startYear = 2026;
+    const currentYear = new Date().getFullYear();
+    const yearText = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
+    document.querySelectorAll('.copyright-year').forEach(el => {
+        el.textContent = yearText;
+    });
+}
+
