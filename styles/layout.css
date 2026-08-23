@@ -511,7 +511,7 @@
 
 .progression-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 16px;
 }
 
@@ -781,7 +781,27 @@ body.modal-open .floating-clan-btn {
     }
 }
 
-@media (max-width: 480px) { .player-stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+@media (max-width: 480px) {
+    .player-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    
+    .player-stats-grid .stat-card.minimal {
+        padding: 12px 8px !important;
+        gap: 6px !important;
+        flex-direction: column !important;
+        text-align: center !important;
+    }
+
+    .player-stats-grid .stat-value {
+        font-size: 1.15rem !important;
+    }
+
+    .player-stats-grid .stat-label {
+        font-size: 0.65rem !important;
+    }
+}
 
 .stat-card.minimal {
     padding: 18px !important;
@@ -1045,7 +1065,15 @@ body.modal-open .floating-podium-btn {
     display: flex;
     gap: 8px;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+.podium-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .podium-tabs .badge {
@@ -1058,6 +1086,7 @@ body.modal-open .floating-podium-btn {
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .podium-tabs .badge:hover {
