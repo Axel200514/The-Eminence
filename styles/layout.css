@@ -1505,6 +1505,118 @@ body.modal-open .floating-podium-btn {
 
 
 
+/* WINNERS ANNOUNCEMENT MODAL (Base Styles) */
+.winner-announcement-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.95);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.5s ease;
+}
+
+.winner-announcement-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.all-winners-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
+    animation: winnersEnter 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes winnersEnter {
+    0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.winners-title {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.winners-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.winner-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.winner-row:hover {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.winner-gold {
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(255,215,0,0.02) 100%);
+}
+
+.winner-silver {
+    border: 1px solid rgba(192, 192, 192, 0.3);
+}
+
+.winner-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-gold);
+    object-fit: cover;
+}
+
+.winner-avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #C0C0C0;
+    object-fit: cover;
+}
+
+.winner-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.winner-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.w-gen-gain, .w-c1-gain, .w-c2-gain {
+    font-size: 1.1rem;
+    text-shadow: 0 0 10px rgba(0, 230, 153, 0.4);
+}
+
+.close-announcement-btn {
+    margin-top: 24px;
+}
+
 @media (min-width: 768px) {
     .all-winners-card {
         padding: 40px;
