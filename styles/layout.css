@@ -1505,7 +1505,35 @@ body.modal-open .floating-podium-btn {
 
 
 
-/* WINNERS ANNOUNCEMENT MODAL (Base Styles) */
+.confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 101;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 24px;
+    background-color: var(--bg-color, #ffcf33);
+    top: -30px;
+    left: var(--left, 50%);
+    opacity: 0;
+    border-radius: 4px;
+    animation: confettiFall var(--anim-dur, 3s) linear var(--anim-delay, 0s) infinite;
+}
+
+@keyframes confettiFall {
+    0% { transform: translateY(-30px) rotate(0deg) rotateX(0deg); opacity: 1; }
+    50% { transform: translateY(50vh) rotate(180deg) rotateX(180deg); }
+    100% { transform: translateY(100vh) rotate(360deg) rotateX(360deg); opacity: 0; }
+}
+
 .winner-announcement-overlay {
     position: absolute;
     top: 0;
