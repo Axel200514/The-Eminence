@@ -24,14 +24,21 @@ export async function onRequest(context) {
     let tags = tagsParam.split(',').map(t => t.trim());
     tags = tags.map(t => t.startsWith('#') ? t : '#' + t.replace('%23', ''));
 
-    const dateModifier = days === 9999 ? `'-100 years'` : `'-${days} days'`;
+    let dateCondition = '';
+    if (days === 7) {
+        dateCondition = `recorded_at >= date('now', 'weekday 1', '-7 days')`;
+    } else {
+        const dateModifier = days === 9999 ? `'-100 years'` : `'-${days} days'`;
+        dateCondition = `recorded_at >= datetime('now', ${dateModifier})`;
+    }
+
     const placeholders = tags.map(() => '?').join(',');
 
     try {
         const query = `
             SELECT player_tag, MIN(recorded_at) as oldest_record, trophies as old_trophies
             FROM player_history
-            WHERE player_tag IN (${placeholders}) AND recorded_at >= datetime('now', ${dateModifier})
+            WHERE player_tag IN (${placeholders}) AND ${dateCondition}
             GROUP BY player_tag
         `;
         
