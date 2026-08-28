@@ -26,7 +26,7 @@ export async function onRequest(context) {
 
     let dateCondition = '';
     if (days === 7) {
-        dateCondition = `recorded_at >= date('now', 'weekday 4', '-7 days')`;
+        dateCondition = `recorded_at >= date('now', 'weekday 3', '-7 days')`;
     } else {
         const dateModifier = days === 9999 ? `'-100 years'` : `'-${days} days'`;
         dateCondition = `recorded_at >= datetime('now', ${dateModifier})`;
