@@ -359,6 +359,9 @@ class App {
             this.renderHeader();
             this.renderMembers();
             this.setupClanChart();
+            if (typeof initOrbitAnimation === 'function') {
+                initOrbitAnimation(this.clanData);
+            }
             this.showState('content');
         } catch (error) {
             this.dom.errorMessage.textContent = error.message || 'Error al cargar los datos del clan.';
@@ -645,3 +648,65 @@ class App {
 }
 
 document.addEventListener('DOMContentLoaded', () => new App());
+
+function initOrbitAnimation(clanData) {
+    const container = document.getElementById("orbit-system-container");
+    const template = document.getElementById("orbit-satellite-template");
+    if (!container || !template || !clanData || !clanData.members) return;
+
+    container.querySelectorAll('.satellite-wrapper').forEach(el => el.remove());
+
+    const members = clanData.members;
+    const userAcc = members.find(m => m.tag === '#YPLYVQVLL') || {
+        tag: '#YPLYVQVLL',
+        name: '🪷アレックス🪷',
+        icon: { id: 28000889 }
+    };
+    
+    // Filtramos a los que ya están en la lista para evitar duplicados
+    const usedTags = new Set([userAcc.tag]);
+    
+    const president = members.find(m => m.role === 'president' && !usedTags.has(m.tag)) || members.find(m => !usedTags.has(m.tag));
+    if (president) usedTags.add(president.tag);
+    
+    const vicePresident = members.find(m => m.role === 'vicePresident' && !usedTags.has(m.tag)) || members.find(m => !usedTags.has(m.tag));
+    if (vicePresident) usedTags.add(vicePresident.tag);
+    
+    const topPlayer = members.find(m => !usedTags.has(m.tag)) || members[3] || members[0];
+
+    const getIconUrl = (iconId) => `https://cdn.brawlify.com/profile-icons/regular/${iconId}.png`;
+
+    const orbitData = [];
+    if (userAcc) orbitData.push({ name: `Yo (${userAcc.name})`, icon: getIconUrl(userAcc.icon?.id || '28000000') });
+    if (president) orbitData.push({ name: `Presi (${president.name})`, icon: getIconUrl(president.icon?.id || '28000000') });
+    if (vicePresident) orbitData.push({ name: `Vice (${vicePresident.name})`, icon: getIconUrl(vicePresident.icon?.id || '28000000') });
+    if (topPlayer) orbitData.push({ name: `Top (${topPlayer.name})`, icon: getIconUrl(topPlayer.icon?.id || '28000000') });
+
+    const fragment = document.createDocumentFragment();
+    const duration = 18;
+
+    orbitData.forEach((app, index) => {
+        const clone = template.content.cloneNode(true);
+        const wrapper = clone.querySelector(".satellite-wrapper");
+        const sat = clone.querySelector(".satellite");
+        const blob = clone.querySelector(".blob");
+        const inner = clone.querySelector(".satellite-inner");
+        const img = clone.querySelector("img");
+        const srOnly = clone.querySelector(".sr-only");
+
+        const delay = -(duration / orbitData.length) * index;
+        
+        wrapper.style.animationDelay = `${delay}s`;
+        sat.style.animationDelay = `${delay}s`;
+        blob.style.animationDelay = `${-index * 2.3}s`;
+        inner.style.animationDelay = `${-index * 1.3}s`;
+
+        img.src = app.icon;
+        img.alt = "";
+        if (srOnly) srOnly.textContent = app.name;
+
+        fragment.appendChild(clone);
+    });
+
+    container.appendChild(fragment);
+}

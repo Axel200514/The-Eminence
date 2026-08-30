@@ -33,10 +33,10 @@
     <meta name="twitter:image" content="https://the-eminence.pages.dev/styles/Icons/Logo.png">
 
 
-    <link rel="stylesheet" href="styles/variables.css?v=2.0.21">
-    <link rel="stylesheet" href="styles/reset.css?v=2.0.21">
-    <link rel="stylesheet" href="styles/layout.css?v=2.0.21">
-    <link rel="stylesheet" href="styles/utilities.css?v=2.0.21">
+    <link rel="stylesheet" href="styles/variables.css?v=2.0.24">
+    <link rel="stylesheet" href="styles/reset.css?v=2.0.24">
+    <link rel="stylesheet" href="styles/layout.css?v=2.0.24">
+    <link rel="stylesheet" href="styles/utilities.css?v=2.0.24">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="icon" href="favicon.ico" sizes="any">
@@ -67,6 +67,18 @@
 
         <section id="state-content" class="hidden">
             <div class="glass-panel clan-header-card">
+                
+                <div class="scene">
+                    <div class="orbit-system" id="orbit-system-container">
+                        <div class="profile-wrapper">
+                            <div class="profile">
+                                <img src="styles/Icons/Logo_Clean.png" alt="TE">
+                            </div>
+                            <div class="glow-effect"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <h1 id="clan-name" class="clan-main-title text-shimmer">The Eminence</h1>
                 <div id="clan-tag" class="clan-tag-badge">#80L9UYGQG</div>
                 <p id="clan-desc" class="clan-description-text"></p>
@@ -454,6 +466,17 @@
             <div class="sc-footer">THE EMINENCE STATS</div>
         </div>
     </div>
+    <template id="orbit-satellite-template">
+        <div class="satellite-wrapper">
+            <div class="satellite">
+                <div class="satellite-inner">
+                    <div class="blob"></div>
+                    <img src="" alt="">
+                    <span class="sr-only"></span>
+                </div>
+            </div>
+        </div>
+    </template>
 </body>
 </html>
 
