@@ -404,21 +404,32 @@
                             <p id="report-active-members">0/0 Miembros</p>
                         </div>
                         <div class="report-stat-box box-risk">
-                            <h3>En Riesgo</h3>
+                            <h3 id="report-risk-title">Bajo Aporte</h3>
                             <p id="report-risk-members">0 Jugadores</p>
                         </div>
                     </div>
 
                     <h2 class="report-section-title title-mvp">🔥 Top Pushers (MVPs)</h2>
-                    <ul id="report-mvp-list" class="report-list"></ul>
+                    <table class="report-table report-mvp-table">
+                        <colgroup>
+                            <col class="col-mvp-name">
+                            <col class="col-mvp-gain">
+                        </colgroup>
+                        <tbody id="report-mvp-list"></tbody>
+                    </table>
 
-                    <h2 class="report-section-title title-inactive">👻 Semáforo de Inactividad (0 o negativo)</h2>
+                    <h2 class="report-section-title title-inactive" id="report-table-title">👥 Rendimiento de Miembros</h2>
                     <table class="report-table">
+                        <colgroup>
+                            <col class="col-player">
+                            <col class="col-tag">
+                            <col class="col-gain">
+                        </colgroup>
                         <thead>
                             <tr>
-                                <th>Jugador</th>
-                                <th>Clan</th>
-                                <th class="text-right">Variación</th>
+                                <th class="th-player">Jugador</th>
+                                <th class="th-tag">Tag</th>
+                                <th class="th-gain">Variación</th>
                             </tr>
                         </thead>
                         <tbody id="report-inactive-list"></tbody>
@@ -429,17 +440,17 @@
     </div>
     
     <template id="report-mvp-template">
-        <li class="report-list-item">
-            <strong class="mvp-name"></strong>
-            <span class="mvp-gain"></span>
-        </li>
+        <tr>
+            <td class="mvp-name"></td>
+            <td class="mvp-gain"></td>
+        </tr>
     </template>
 
     <template id="report-inactive-template">
         <tr>
             <td class="inactive-name"></td>
             <td class="inactive-tag"></td>
-            <td class="inactive-gain text-right"></td>
+            <td class="inactive-gain"></td>
         </tr>
     </template>
 

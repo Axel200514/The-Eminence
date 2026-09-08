@@ -1,9 +1,11 @@
+const API_BASE = 'https://the-eminence.pages.dev';
+
 export class ReportManager {
     constructor(getClanDataFn = null, clanTag = '80L9UYGQG') {
         this.getClanDataFn = getClanDataFn;
         this.clanTag = clanTag;
         this.availableDates = [];
-        this.currentReportData = null;
+        this.isLoadingDates = false;
         this.setupUI();
     }
 
@@ -18,28 +20,72 @@ export class ReportManager {
 
         if (!btnOpen || !modal) return;
 
-        btnOpen.onclick = () => {
-            modal.classList.remove('hidden');
-            document.body.classList.add('modal-open');
-            if (this.availableDates.length === 0) {
-                this.loadDates();
-            }
-        };
-
-        btnClose.onclick = () => {
+        const closeModal = () => {
             modal.classList.add('hidden');
             document.body.classList.remove('modal-open');
         };
 
-        typeSelect.onchange = () => this.populateDateSelect();
-        btnGenerate.onclick = () => this.generateReport();
-        btnDownload.onclick = () => this.downloadPDF();
+        btnOpen.onclick = () => {
+            modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+            if (this.availableDates.length === 0 && !this.isLoadingDates) {
+                this.loadDates();
+            }
+        };
+
+        if (btnClose) btnClose.onclick = closeModal;
+
+        modal.onclick = (e) => {
+            if (e.target === modal) closeModal();
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        if (typeSelect) {
+            typeSelect.onchange = () => {
+                document.getElementById('report-preview-container')?.classList.add('hidden');
+                document.getElementById('btn-download-pdf')?.classList.add('hidden');
+                if (this.availableDates.length === 0 && !this.isLoadingDates) {
+                    this.loadDates();
+                } else {
+                    this.populateDateSelect();
+                }
+            };
+        }
+
+        if (dateSelect) {
+            dateSelect.onchange = () => {
+                document.getElementById('report-preview-container')?.classList.add('hidden');
+                document.getElementById('btn-download-pdf')?.classList.add('hidden');
+            };
+        }
+
+        if (btnGenerate) btnGenerate.onclick = () => this.generateReport();
+        if (btnDownload) btnDownload.onclick = () => this.downloadPDF();
     }
 
     async loadDates() {
         const dateSelect = document.getElementById('report-date-select');
+        const btnGenerate = document.getElementById('btn-generate-report');
+        if (!dateSelect) return;
+
+        if (this.isLoadingDates) return;
+        this.isLoadingDates = true;
+
+        if (btnGenerate) btnGenerate.disabled = true;
+        dateSelect.textContent = '';
+        const loadingOption = document.createElement('option');
+        loadingOption.value = '';
+        loadingOption.textContent = 'Cargando fechas...';
+        dateSelect.appendChild(loadingOption);
+
         try {
-            const res = await fetch(`https://the-eminence.pages.dev/getHistory?type=clan&tag=${this.clanTag}&days=9999`);
+            const cleanTag = this.clanTag.replace(/^#/, '');
+            const res = await fetch(`${API_BASE}/getHistory?type=clan&tag=${cleanTag}&days=9999`);
             if (!res.ok) throw new Error('Network response was not ok');
             const data = await res.json();
             
@@ -54,21 +100,28 @@ export class ReportManager {
             option.value = '';
             option.textContent = 'Error cargando fechas';
             dateSelect.appendChild(option);
+            if (btnGenerate) btnGenerate.disabled = true;
+        } finally {
+            this.isLoadingDates = false;
         }
     }
 
     populateDateSelect() {
         const type = document.getElementById('report-type-select').value;
         const select = document.getElementById('report-date-select');
+        const btnGenerate = document.getElementById('btn-generate-report');
         select.textContent = '';
 
         if (this.availableDates.length === 0) {
             const option = document.createElement('option');
             option.value = '';
-            option.textContent = 'No hay datos disponibles';
+            option.textContent = this.isLoadingDates ? 'Cargando fechas...' : 'No hay datos disponibles';
             select.appendChild(option);
+            if (btnGenerate) btnGenerate.disabled = true;
             return;
         }
+
+        if (btnGenerate) btnGenerate.disabled = false;
 
         const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
@@ -92,7 +145,6 @@ export class ReportManager {
                     }
                 }
                 
-                // Group by the month of newerDate (YYYY-MM-DD)
                 const [yearStr, monthStr] = newerDate.split('-');
                 const groupLabel = `${monthNames[parseInt(monthStr, 10) - 1]} ${yearStr}`;
                 
@@ -163,63 +215,121 @@ export class ReportManager {
         if (!val) return;
         const [start, end] = val.split('|');
 
+        const btnGenerate = document.getElementById('btn-generate-report');
+        if (btnGenerate) btnGenerate.disabled = true;
+
         document.getElementById('report-loading').classList.remove('hidden');
         document.getElementById('report-preview-container').classList.add('hidden');
         document.getElementById('btn-download-pdf').classList.add('hidden');
 
         try {
-            const clanData = this.getClanDataFn ? this.getClanDataFn() : null;
-            let tagsQuery = '';
-            if (clanData && clanData.memberList && clanData.memberList.length > 0) {
-                const tags = clanData.memberList.map(m => m.tag.replace('#', '')).join(',');
-                tagsQuery = `&tags=${tags}`;
+            let clanData = (typeof this.getClanDataFn === 'function') ? this.getClanDataFn() : null;
+            let members = clanData?.members || clanData?.memberList || [];
+
+            if (!members || members.length === 0) {
+                const cleanTag = this.clanTag.replace(/^#/, '');
+                const clanRes = await fetch(`${API_BASE}/getClan?tag=${cleanTag}`);
+                if (clanRes.ok) {
+                    const fetchedClan = await clanRes.json();
+                    members = fetchedClan.members || fetchedClan.memberList || [];
+                }
             }
 
-            const res = await fetch(`https://the-eminence.pages.dev/getReport?start=${start}&end=${end}${tagsQuery}`);
-            if (!res.ok) throw new Error('Error fetch report');
+            if (!members || members.length === 0) {
+                throw new Error('No se pudieron obtener los miembros del clan actual.');
+            }
+
+            const cleanTags = members.map(m => (m.tag || m.player_tag || '').replace(/^#/, '')).filter(Boolean).join(',');
+            const tagsQuery = cleanTags ? `&tags=${encodeURIComponent(cleanTags)}` : '';
+
+            const res = await fetch(`${API_BASE}/getReport?start=${start}&end=${end}${tagsQuery}`);
+            if (!res.ok) throw new Error('Error al obtener datos del reporte');
             const data = await res.json();
             
-            this.renderReport(data, start, end);
+            this.renderReport(data, start, end, members);
         } catch (e) {
             console.error(e);
             alert('Error al generar informe: ' + e.message);
         } finally {
             document.getElementById('report-loading').classList.add('hidden');
+            if (btnGenerate) btnGenerate.disabled = false;
         }
     }
 
-    renderReport(data, start, end) {
+    renderReport(data, start, end, fullMemberList = []) {
         document.getElementById('report-preview-container').classList.remove('hidden');
         document.getElementById('btn-download-pdf').classList.remove('hidden');
         document.getElementById('report-subtitle-print').textContent = `Período: ${start} hasta ${end}`;
 
+        const reportType = document.getElementById('report-type-select').value;
+        let threshold = reportType === 'weekly' ? 800 : (reportType === 'monthly' ? 2000 : null);
+
         let netGain = 0;
-        let inactiveList = [];
         let mvpList = [];
-        
+        let riskCount = 0;
+        const historyMap = new Map();
+        const normalizeTag = (tag) => (tag || '').replace(/^#/, '').toUpperCase();
+
         data.forEach(p => {
-            const gain = p.end_trophies - p.start_trophies;
-            netGain += gain;
-            
-            if (gain <= 0) {
-                inactiveList.push({ ...p, gain });
-            }
-            mvpList.push({ ...p, gain });
+            const startTrophies = Number.isFinite(Number(p.start_trophies)) ? Number(p.start_trophies) : 0;
+            const endTrophies = Number.isFinite(Number(p.end_trophies)) ? Number(p.end_trophies) : startTrophies;
+            const gain = endTrophies - startTrophies;
+            historyMap.set(normalizeTag(p.player_tag), {
+                player_tag: p.player_tag,
+                player_name: p.player_name,
+                gain,
+                hasRecord: true
+            });
         });
 
+        const membersArray = Array.isArray(fullMemberList) ? fullMemberList : [];
+
+        membersArray.forEach(m => {
+            const tagKey = normalizeTag(m.tag || m.player_tag);
+            const record = historyMap.get(tagKey);
+            if (record) {
+                netGain += record.gain;
+                const isRisk = threshold !== null ? record.gain < threshold : record.gain <= 0;
+                if (isRisk) riskCount++;
+                mvpList.push({ ...record, isRisk });
+            } else {
+                if (threshold !== null) riskCount++;
+                mvpList.push({
+                    player_tag: m.tag || m.player_tag,
+                    player_name: m.name || m.player_name,
+                    gain: 0,
+                    isRisk: true,
+                    hasRecord: false
+                });
+            }
+        });
+
+        if (membersArray.length === 0) {
+            historyMap.forEach(record => {
+                netGain += record.gain;
+                const isRisk = threshold !== null ? record.gain < threshold : record.gain <= 0;
+                if (isRisk) riskCount++;
+                mvpList.push({ ...record, isRisk });
+            });
+        }
+
         mvpList.sort((a, b) => b.gain - a.gain);
-        inactiveList.sort((a, b) => a.gain - b.gain);
 
         const netGainEl = document.getElementById('report-net-gain');
         netGainEl.textContent = (netGain > 0 ? '+' : '') + netGain + ' Copas';
-        if (netGain >= 0) {
-            netGainEl.style.color = '#2e7d32';
-        } else {
-            netGainEl.style.color = '#c62828';
-        }
+        netGainEl.className = netGain >= 0 ? 'gain-good' : 'gain-risk';
 
-        document.getElementById('report-active-members').textContent = data.length + ' Miembros';
-        document.getElementById('report-risk-members').textContent = inactiveList.length + ' Jugadores';
+        const totalCount = membersArray.length > 0 ? membersArray.length : data.length;
+        const activeCount = historyMap.size;
+        document.getElementById('report-active-members').textContent = `${activeCount} / ${totalCount} Miembros`;
+        
+        const riskMembersEl = document.getElementById('report-risk-members');
+        riskMembersEl.textContent = reportType === 'global' ? 'N/A' : `${riskCount} Jugadores`;
+
+        const qualifyingMvps = mvpList.filter(p => p.hasRecord && (threshold !== null ? p.gain >= threshold : p.gain > 0));
+        const mvpPlayers = qualifyingMvps.slice(0, 5);
+        const mvpTags = new Set(mvpPlayers.map(p => normalizeTag(p.player_tag)));
+        const restOfMembers = mvpList.filter(p => !mvpTags.has(normalizeTag(p.player_tag)));
 
         const mvpContainer = document.getElementById('report-mvp-list');
         const mvpTemplate = document.getElementById('report-mvp-template');
@@ -227,12 +337,22 @@ export class ReportManager {
         
         if (mvpTemplate) {
             const mvpFragment = document.createDocumentFragment();
-            mvpList.slice(0, 5).forEach((p, i) => {
-                const clone = mvpTemplate.content.cloneNode(true);
-                clone.querySelector('.mvp-name').textContent = `#${i+1} ${p.player_name}`;
-                clone.querySelector('.mvp-gain').textContent = `+${p.gain}`;
-                mvpFragment.appendChild(clone);
-            });
+            if (mvpPlayers.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 2;
+                td.className = 'text-center report-empty-cell';
+                td.textContent = 'Ningún jugador alcanzó el aporte mínimo de MVP.';
+                tr.appendChild(td);
+                mvpFragment.appendChild(tr);
+            } else {
+                mvpPlayers.forEach((p, i) => {
+                    const clone = mvpTemplate.content.cloneNode(true);
+                    clone.querySelector('.mvp-name').textContent = `#${i+1} ${p.player_name}`;
+                    clone.querySelector('.mvp-gain').textContent = (p.gain > 0 ? '+' : '') + p.gain;
+                    mvpFragment.appendChild(clone);
+                });
+            }
             mvpContainer.appendChild(mvpFragment);
         }
 
@@ -242,33 +362,132 @@ export class ReportManager {
         
         if (inactiveTemplate) {
             const inactiveFragment = document.createDocumentFragment();
-            inactiveList.forEach(p => {
-                const clone = inactiveTemplate.content.cloneNode(true);
-                clone.querySelector('.inactive-name').textContent = p.player_name;
-                clone.querySelector('.inactive-tag').textContent = p.player_tag;
-                clone.querySelector('.inactive-gain').textContent = p.gain;
-                inactiveFragment.appendChild(clone);
-            });
+            if (restOfMembers.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 3;
+                td.className = 'text-center report-empty-cell';
+                td.textContent = 'No hay más miembros que mostrar.';
+                tr.appendChild(td);
+                inactiveFragment.appendChild(tr);
+            } else {
+                restOfMembers.forEach((p, i) => {
+                    const clone = inactiveTemplate.content.cloneNode(true);
+                    const rankNum = i + mvpPlayers.length + 1;
+                    clone.querySelector('.inactive-name').textContent = `#${rankNum} ${p.player_name}`;
+                    clone.querySelector('.inactive-tag').textContent = p.player_tag;
+                    
+                    const gainEl = clone.querySelector('.inactive-gain');
+                    gainEl.textContent = '';
+                    const valSpan = document.createElement('span');
+
+                    if (p.hasRecord === false) {
+                        valSpan.className = 'gain-neutral';
+                        valSpan.textContent = 'Sin registro';
+                    } else {
+                        const gainStr = (p.gain > 0 ? '+' : '') + p.gain;
+                        if (threshold !== null) {
+                            valSpan.className = p.gain < threshold ? 'gain-risk' : 'gain-good';
+                        } else {
+                            valSpan.className = p.gain > 0 ? 'gain-good' : (p.gain < 0 ? 'gain-risk' : 'gain-neutral');
+                        }
+                        valSpan.textContent = gainStr;
+                    }
+                    gainEl.appendChild(valSpan);
+                    inactiveFragment.appendChild(clone);
+                });
+            }
             inactiveContainer.appendChild(inactiveFragment);
         }
     }
 
     async downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'pt', 'a4');
+        const btn = document.getElementById('btn-download-pdf');
         const element = document.getElementById('report-content-print');
         
-        document.getElementById('btn-download-pdf').textContent = "Procesando...";
+        if (!element) return;
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Procesando...";
+        }
 
-        await html2canvas(element, { scale: 2 }).then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const pdfWidth = doc.internal.pageSize.getWidth();
+        try {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                throw new Error('La librería jsPDF no está disponible.');
+            }
+            if (typeof html2canvas === 'undefined') {
+                throw new Error('La librería html2canvas no está disponible.');
+            }
+
+            const { jsPDF } = window.jspdf;
+
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+
+            const canvas = await html2canvas(element, { 
+                scale: 2,
+                backgroundColor: '#14151f',
+                useCORS: true,
+                scrollX: 0,
+                scrollY: 0,
+                windowWidth: 1200,
+                windowHeight: 5000,
+                onclone: (clonedDoc) => {
+                    clonedDoc.body.style.height = 'auto';
+                    clonedDoc.body.style.minHeight = '5000px';
+                    clonedDoc.body.style.overflow = 'visible';
+                    clonedDoc.body.style.fontFamily = "'Outfit', system-ui, -apple-system, sans-serif";
+                    clonedDoc.documentElement.style.height = 'auto';
+                    clonedDoc.documentElement.style.overflow = 'visible';
+
+                    const printEl = clonedDoc.getElementById('report-content-print');
+                    if (printEl) {
+                        printEl.style.height = 'auto';
+                        printEl.style.maxHeight = 'none';
+                        printEl.style.overflow = 'visible';
+                        printEl.style.width = '640px';
+                        printEl.style.maxWidth = '640px';
+                        printEl.style.margin = '0 auto';
+                        printEl.style.padding = '22px 26px';
+                        printEl.style.boxSizing = 'border-box';
+                    }
+                    const preview = clonedDoc.getElementById('report-preview-container');
+                    if (preview) {
+                        preview.style.height = 'auto';
+                        preview.style.maxHeight = 'none';
+                        preview.style.overflow = 'visible';
+                        preview.style.padding = '0';
+                        preview.style.border = 'none';
+                    }
+                    const modal = clonedDoc.querySelector('.modal-content');
+                    if (modal) {
+                        modal.style.height = 'auto';
+                        modal.style.maxHeight = 'none';
+                        modal.style.overflow = 'visible';
+                    }
+                }
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.98);
+            const pdfWidth = 595.28;
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            
-            doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-            doc.save(`Informe_Clan_${new Date().toISOString().split('T')[0]}.pdf`);
-        });
 
-        document.getElementById('btn-download-pdf').textContent = "Descargar PDF";
+            const doc = new jsPDF('p', 'pt', [pdfWidth, pdfHeight]);
+
+            doc.setFillColor(20, 21, 31);
+            doc.rect(0, 0, pdfWidth, pdfHeight, 'F');
+            doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            const cleanTag = this.clanTag.replace(/^#/, '');
+            doc.save(`Informe_Clan_${cleanTag}_${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (err) {
+            console.error('PDF error:', err);
+            alert('Error generando PDF: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Descargar PDF";
+            }
+        }
     }
 }
