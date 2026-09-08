@@ -1539,7 +1539,7 @@ body.modal-open .floating-podium-btn {
     width: 100%;
     height: 100%;
     background: rgba(10, 10, 15, 0.95);
-    z-index: 100;
+    z-index: 10000;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1647,6 +1647,7 @@ body.modal-open .floating-podium-btn {
     .all-winners-card {
         padding: 40px;
         width: 600px;
+        max-width: 600px;
     }
     .winners-title {
         font-size: 1.8rem;
