@@ -39,6 +39,7 @@
     <link rel="stylesheet" href="styles/utilities.css?v=2.0.24">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" href="styles/Icons/Logo.png" type="image/png">
 </head>
@@ -137,6 +138,7 @@
                     <option value="name-asc">Nombre (A-Z)</option>
                 </select>
                 <button id="export-btn" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</button>
+                <button id="btn-report" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Informes</button>
             </div>
 
             <div id="members-list" class="grid-members"></div>
@@ -362,7 +364,85 @@
             </div>
         </div>
     </div>
+
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel report-modal-container">
+            <button id="close-report" class="modal-close">&times;</button>
+            <div class="podium-header-banner">
+                <div>
+                    <h2 class="section-title text-purple margin-0">📋 INFORME DEL CLAN</h2>
+                </div>
+            </div>
+            
+            <div class="report-controls">
+                <select id="report-type-select" class="sort-select select-report-type">
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly">Mensual</option>
+                    <option value="global">Global (Histórico)</option>
+                </select>
+                <select id="report-date-select" class="sort-select select-report-date">
+                    <option value="">Cargando fechas...</option>
+                </select>
+                <button id="btn-generate-report" class="retry-btn">Generar</button>
+                <button id="btn-download-pdf" class="retry-btn btn-export btn-pdf hidden">Descargar PDF</button>
+            </div>
+
+            <div id="report-loading" class="podium-loading-state hidden">Generando informe...</div>
+            
+            <div id="report-preview-container" class="report-preview hidden">
+                <div id="report-content-print" class="report-print-area">
+                    <h1 class="report-title">Auditoría del Clan: The Eminence</h1>
+                    <p class="report-subtitle" id="report-subtitle-print">Cargando...</p>
+                    
+                    <div class="report-stats-grid">
+                        <div class="report-stat-box box-net">
+                            <h3>Balance Neto</h3>
+                            <p id="report-net-gain">+0 Copas</p>
+                        </div>
+                        <div class="report-stat-box box-activity">
+                            <h3>Actividad</h3>
+                            <p id="report-active-members">0/0 Miembros</p>
+                        </div>
+                        <div class="report-stat-box box-risk">
+                            <h3>En Riesgo</h3>
+                            <p id="report-risk-members">0 Jugadores</p>
+                        </div>
+                    </div>
+
+                    <h2 class="report-section-title title-mvp">🔥 Top Pushers (MVPs)</h2>
+                    <ul id="report-mvp-list" class="report-list"></ul>
+
+                    <h2 class="report-section-title title-inactive">👻 Semáforo de Inactividad (0 o negativo)</h2>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Jugador</th>
+                                <th>Clan</th>
+                                <th class="text-right">Variación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-inactive-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
     
+    <template id="report-mvp-template">
+        <li class="report-list-item">
+            <strong class="mvp-name"></strong>
+            <span class="mvp-gain"></span>
+        </li>
+    </template>
+
+    <template id="report-inactive-template">
+        <tr>
+            <td class="inactive-name"></td>
+            <td class="inactive-tag"></td>
+            <td class="inactive-gain text-right"></td>
+        </tr>
+    </template>
+
     <template id="podium-top-template">
         <div class="podium-step">
             <div class="podium-crown hidden">👑</div>

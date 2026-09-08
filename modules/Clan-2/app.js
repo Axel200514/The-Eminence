@@ -3,6 +3,7 @@ import { ClanService } from '../core/services/clan.service.js';
 import { HistoryService } from '../core/services/history.service.js';
 import { ChartManager } from '../shared/utils/chart.js';
 import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, initDynamicYear } from '../shared/utils/formatters.js';
+import { ReportManager } from '../shared/utils/report.js';
 
 class App {
     constructor() {
@@ -29,6 +30,7 @@ class App {
             memberTemplate: document.getElementById('member-template')
         };
 
+        this.reportManager = new ReportManager(() => this.clanData, '2CGG8Y229');
         this.init();
     }
 
