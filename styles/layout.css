@@ -433,7 +433,7 @@
 
 .brawlers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
     gap: 12px;
 }
 
@@ -448,13 +448,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    gap: 8px;
+    margin-bottom: 6px;
+    gap: 6px;
 }
 
 .brawler-name {
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.82rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -467,12 +467,15 @@
     border: 1px solid rgba(248, 113, 113, 0.3);
     white-space: nowrap;
     flex-shrink: 0;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    letter-spacing: 0.02em;
 }
 
 .brawler-stats {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
 }
 
 .text-small {
@@ -984,12 +987,12 @@ body.modal-open .floating-clan-btn {
 .brawler-card {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px;
+    gap: 8px;
+    padding: 8px 10px;
 }
 .brawler-avatar {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
     border-radius: 8px;
     flex-shrink: 0;
