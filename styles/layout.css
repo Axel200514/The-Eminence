@@ -449,17 +449,24 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
+    gap: 8px;
 }
 
 .brawler-name {
     font-weight: 700;
     font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .brawler-power {
     background: rgba(248, 113, 113, 0.15);
     color: var(--accent-red);
     border: 1px solid rgba(248, 113, 113, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .brawler-stats {
