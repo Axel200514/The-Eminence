@@ -9,7 +9,8 @@ export class HistoryService {
 
     static async getPodium(tags, days = 7) {
         const cleanTags = tags.map(t => t.replace(/^#/, '')).join(',');
-        const url = `https://the-eminence.pages.dev/getPodium?tags=${cleanTags}&days=${days}`;
+        const tzOffset = new Date().getTimezoneOffset();
+        const url = `https://the-eminence.pages.dev/getPodium?tags=${cleanTags}&days=${days}&tzOffset=${tzOffset}`;
         return await HttpService.get(url);
     }
 }

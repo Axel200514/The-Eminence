@@ -13,6 +13,8 @@ export async function onRequest(context) {
     const url = new URL(context.request.url);
     const tagsParam = url.searchParams.get('tags');
     const days = parseInt(url.searchParams.get('days')) || 7;
+    const tzOffsetParam = url.searchParams.get('tzOffset');
+    const tzOffset = tzOffsetParam !== null ? parseInt(tzOffsetParam) : 360;
 
     if (!context.env.DB) {
         return new Response(JSON.stringify({ error: 'Database not bound' }), { status: 500, headers: {'Access-Control-Allow-Origin': '*'} });
@@ -26,7 +28,16 @@ export async function onRequest(context) {
 
     let dateCondition = '';
     if (days === 7) {
-        dateCondition = `recorded_at >= date('now', 'weekday 3', '-7 days')`;
+        const now = new Date();
+        const clientTime = new Date(now.getTime() - (tzOffset * 60 * 1000));
+        const clientDay = clientTime.getUTCDay();
+        const daysSinceWed = (clientDay - 3 + 7) % 7;
+        const daysToSubtract = daysSinceWed === 0 ? 7 : daysSinceWed;
+        const cutoffDate = new Date(clientTime.getTime() - (daysToSubtract * 24 * 60 * 60 * 1000));
+        const year = cutoffDate.getUTCFullYear();
+        const month = String(cutoffDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(cutoffDate.getUTCDate()).padStart(2, '0');
+        dateCondition = `recorded_at >= '${year}-${month}-${day}'`;
     } else {
         const dateModifier = days === 9999 ? `'-100 years'` : `'-${days} days'`;
         dateCondition = `recorded_at >= datetime('now', ${dateModifier})`;
