@@ -554,6 +554,7 @@ class App {
             let unlockedStarPowers = 0;
             let unlockedGadgets = 0;
             let unlockedGears = 0;
+            let unlockedHypercharges = 0;
             let totalPrestigeTrophies = 0;
             let prestige1Count = 0;
             let prestige2Count = 0;
@@ -563,6 +564,7 @@ class App {
                 unlockedStarPowers += (b.starPowers || []).length;
                 unlockedGadgets += (b.gadgets || []).length;
                 unlockedGears += (b.gears || []).length;
+                unlockedHypercharges += (b.hyperCharges || []).length;
 
                 const current = b.trophies || 0;
                 const peak = Math.max(current, b.highestTrophies || 0);
@@ -590,6 +592,7 @@ class App {
             document.getElementById('sc-prestige-1').textContent = formatNumber(prestige1Count);
             document.getElementById('sc-prestige-2').textContent = formatNumber(prestige2Count);
             document.getElementById('sc-prestige-3').textContent = formatNumber(prestige3Count);
+            document.getElementById('sc-hypercharges').textContent = formatNumber(unlockedHypercharges);
             document.getElementById('sc-level').textContent = data.expLevel;
             document.getElementById('sc-xp').textContent = formatNumber(data.expPoints);
             document.getElementById('sc-total-wins').textContent = formatNumber(totalWins);
@@ -650,6 +653,7 @@ class App {
             document.getElementById('prog-starpowers').textContent = unlockedStarPowers;
             document.getElementById('prog-gadgets').textContent = unlockedGadgets;
             document.getElementById('prog-gears').textContent = unlockedGears;
+            document.getElementById('prog-hypercharges').textContent = unlockedHypercharges;
             
             const brawlersList = document.getElementById('brawlers-list');
             brawlersList.textContent = '';
