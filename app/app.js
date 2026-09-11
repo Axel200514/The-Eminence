@@ -1,7 +1,7 @@
 import { ClanService } from '../modules/core/services/clan.service.js';
 import { HistoryService } from '../modules/core/services/history.service.js';
 import { ChartManager } from '../modules/shared/utils/chart.js';
-import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, initDynamicYear } from '../modules/shared/utils/formatters.js';
+import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, getRankedIconUrl, getFameIconUrl, initDynamicYear } from '../modules/shared/utils/formatters.js';
 import { ReportManager } from '../modules/shared/utils/report.js';
 
 class App {
@@ -583,6 +583,18 @@ class App {
                 }
             });
 
+            const currentRanked = data.rankedRankName || 'Sin Rango';
+            const currentRankedElo = data.rankedElo ? `Ranked Actual (${formatNumber(data.rankedElo)})` : 'Ranked Actual';
+            const highestRanked = data.highestAllTimeRankedRankName || (data.rankedRankName || 'Sin Rango');
+            const highestRankedElo = data.highestAllTimeRankedElo ? `Récord Ranked (${formatNumber(data.highestAllTimeRankedElo)})` : 'Récord Ranked';
+
+            const currentFame = data.fameTierName || 'Sin Fama';
+            const famePoints = data.fame ? `Fama (${formatNumber(data.fame)} pts)` : 'Fama Mundial';
+
+            const rankedIcon = getRankedIconUrl(data.rankedRankName);
+            const highestRankedIcon = getRankedIconUrl(data.highestAllTimeRankedRankName || data.rankedRankName);
+            const fameIcon = getFameIconUrl(data.fameTierName);
+
             document.getElementById('sc-name').textContent = data.name;
             document.getElementById('sc-tag').textContent = data.tag;
             document.getElementById('sc-trophies').textContent = formatNumber(data.trophies);
@@ -591,6 +603,15 @@ class App {
             document.getElementById('sc-prestige-1').textContent = formatNumber(prestige1Count);
             document.getElementById('sc-prestige-2').textContent = formatNumber(prestige2Count);
             document.getElementById('sc-prestige-3').textContent = formatNumber(prestige3Count);
+            document.getElementById('sc-ranked').textContent = currentRanked;
+            document.getElementById('sc-ranked-label').textContent = currentRankedElo;
+            document.getElementById('sc-ranked-icon').src = rankedIcon;
+            document.getElementById('sc-ranked-highest').textContent = highestRanked;
+            document.getElementById('sc-ranked-highest-label').textContent = highestRankedElo;
+            document.getElementById('sc-ranked-highest-icon').src = highestRankedIcon;
+            document.getElementById('sc-fame').textContent = currentFame;
+            document.getElementById('sc-fame-label').textContent = famePoints;
+            document.getElementById('sc-fame-icon').src = fameIcon;
             document.getElementById('sc-hypercharges').textContent = formatNumber(unlockedHypercharges);
             document.getElementById('sc-level').textContent = data.expLevel;
             document.getElementById('sc-xp').textContent = formatNumber(data.expPoints);
@@ -607,7 +628,8 @@ class App {
                 if (btnText) btnText.textContent = 'Generando...';
                 html2canvas(document.getElementById('share-card'), {
                     backgroundColor: '#0b0e14',
-                    scale: 2
+                    scale: 2,
+                    useCORS: true
                 }).then(canvas => {
                     if (btnText) btnText.textContent = 'Tarjeta Gráfica';
                     const link = document.createElement('a');
@@ -638,6 +660,15 @@ class App {
             document.getElementById('player-prestige-1').textContent = formatNumber(prestige1Count);
             document.getElementById('player-prestige-2').textContent = formatNumber(prestige2Count);
             document.getElementById('player-prestige-3').textContent = formatNumber(prestige3Count);
+            document.getElementById('player-ranked').textContent = currentRanked;
+            document.getElementById('player-ranked-label').textContent = currentRankedElo;
+            document.getElementById('player-ranked-icon').src = rankedIcon;
+            document.getElementById('player-ranked-highest').textContent = highestRanked;
+            document.getElementById('player-ranked-highest-label').textContent = highestRankedElo;
+            document.getElementById('player-ranked-highest-icon').src = highestRankedIcon;
+            document.getElementById('player-fame').textContent = currentFame;
+            document.getElementById('player-fame-label').textContent = famePoints;
+            document.getElementById('player-fame-icon').src = fameIcon;
             document.getElementById('player-level').textContent = data.expLevel;
             document.getElementById('player-xp-points').textContent = formatNumber(data.expPoints);
             

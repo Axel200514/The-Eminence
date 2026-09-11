@@ -618,7 +618,8 @@ body.modal-open .floating-clan-btn {
 }
 .share-card {
     width: 1200px;
-    height: 630px;
+    height: auto;
+    min-height: 630px;
     background: linear-gradient(135deg, #0b0e14 0%, #1a2333 100%);
     color: #fff;
     font-family: 'Poppins', sans-serif;
@@ -699,7 +700,7 @@ body.modal-open .floating-clan-btn {
 .sc-val { font-size: 30px; font-weight: 800; color: #fff; line-height: 1.1; }
 .sc-lbl { font-size: 13px; color: #66fcf1; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; font-weight: 600;}
 .sc-footer {
-    margin-top: auto;
+    margin-top: 32px;
     text-align: center;
     font-size: 28px;
     font-weight: 700;
