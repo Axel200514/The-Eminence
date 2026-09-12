@@ -50,16 +50,22 @@ export function getRankedIconUrl(rankName) {
     return `https://cdn.brawlify.com/ranked/regular/${name}.png`;
 }
 
-export function getFameIconUrl(fameTierName) {
-    if (!fameTierName) return 'https://cdn.brawlify.com/prestiges/regular/1.png';
+export function getFameIconUrl(fameTierName, basePath) {
+    if (!basePath) {
+        basePath = typeof window !== 'undefined' && window.location.pathname.includes('/Clan-2')
+            ? '../../styles/Icons/fame/'
+            : 'styles/Icons/fame/';
+    }
+    if (!fameTierName) return `${basePath}global.png`;
     const tier = fameTierName.toLowerCase();
-    if (tier.includes('alien')) return 'https://cdn.brawlify.com/prestiges/tiered/7.png';
-    if (tier.includes('meteoric')) return 'https://cdn.brawlify.com/prestiges/regular/6.png';
-    if (tier.includes('solar')) return 'https://cdn.brawlify.com/prestiges/regular/5.png';
-    if (tier.includes('saturnian') || tier.includes('saturn')) return 'https://cdn.brawlify.com/prestiges/regular/4.png';
-    if (tier.includes('martian') || tier.includes('mars')) return 'https://cdn.brawlify.com/prestiges/regular/3.png';
-    if (tier.includes('lunar') || tier.includes('moon')) return 'https://cdn.brawlify.com/prestiges/regular/2.png';
-    return 'https://cdn.brawlify.com/prestiges/regular/1.png';
+    if (tier.includes('starr') || tier.includes('force')) return `${basePath}starrforce.png`;
+    if (tier.includes('alien')) return `${basePath}alien.png`;
+    if (tier.includes('meteoric')) return `${basePath}meteoric.png`;
+    if (tier.includes('solar')) return `${basePath}solar.png`;
+    if (tier.includes('saturnian') || tier.includes('saturn')) return `${basePath}saturnian.png`;
+    if (tier.includes('martian') || tier.includes('mars')) return `${basePath}martian.png`;
+    if (tier.includes('lunar') || tier.includes('moon')) return `${basePath}lunar.png`;
+    return `${basePath}global.png`;
 }
 
 export function initDynamicYear() {
