@@ -958,12 +958,12 @@ body.modal-open .floating-clan-btn {
     border: 1px solid rgba(255,255,255,0.1);
     box-shadow: none;
 }
-.stat-icon-gold { color: var(--accent-gold); }
-.stat-icon-blue { color: var(--accent-blue); }
-.stat-icon-neon { color: var(--accent-neon); }
-.stat-icon-purple { color: var(--accent-purple); }
-.stat-icon-red { color: var(--accent-red); }
-.stat-icon-green { color: var(--accent-green); }
+.stat-icon-gold { color: var(--accent-gold); border-color: rgba(255, 193, 7, 0.25); background: rgba(255, 193, 7, 0.05); }
+.stat-icon-blue { color: var(--accent-blue); border-color: rgba(59, 130, 246, 0.25); background: rgba(59, 130, 246, 0.05); }
+.stat-icon-neon { color: var(--accent-neon); border-color: rgba(102, 252, 241, 0.25); background: rgba(102, 252, 241, 0.05); }
+.stat-icon-purple { color: var(--accent-purple); border-color: rgba(199, 36, 177, 0.25); background: rgba(199, 36, 177, 0.05); }
+.stat-icon-red { color: var(--accent-red); border-color: rgba(255, 51, 102, 0.25); background: rgba(255, 51, 102, 0.05); }
+.stat-icon-green { color: var(--accent-green); border-color: rgba(0, 255, 136, 0.25); background: rgba(0, 255, 136, 0.05); }
 
 .member-trophies-container {
     display: inline-flex;
