@@ -83,13 +83,13 @@
     animation-direction: alternate-reverse;
 }
 
-.text-gold { color: var(--accent-gold); text-shadow: 0 0 8px rgba(255, 193, 7, 0.45), 1px 1px 0px #000; }
-.text-neon { color: var(--accent-neon); text-shadow: 0 0 8px rgba(0, 229, 255, 0.45), 1px 1px 0px #000; }
-.text-purple { color: var(--accent-purple); text-shadow: 0 0 8px rgba(199, 36, 177, 0.45), 1px 1px 0px #000; }
-.text-red { color: var(--accent-red); text-shadow: 0 0 8px rgba(255, 51, 102, 0.45), 1px 1px 0px #000; }
-.text-green { color: var(--accent-green); text-shadow: 0 0 8px rgba(0, 255, 136, 0.45), 1px 1px 0px #000; }
-.text-blue { color: var(--accent-blue); text-shadow: 0 0 8px rgba(59, 130, 246, 0.45), 1px 1px 0px #000; }
-.text-cosmic { color: #3b82f6; text-shadow: 0 0 8px rgba(59, 130, 246, 0.55), 1px 1px 0px #000; }
+.text-gold { color: var(--accent-gold); text-shadow: 0 0 4px rgba(255, 193, 7, 0.22), 1px 1px 0px #000; }
+.text-neon { color: var(--accent-neon); text-shadow: 0 0 4px rgba(0, 229, 255, 0.22), 1px 1px 0px #000; }
+.text-purple { color: var(--accent-purple); text-shadow: 0 0 4px rgba(199, 36, 177, 0.22), 1px 1px 0px #000; }
+.text-red { color: var(--accent-red); text-shadow: 0 0 4px rgba(255, 51, 102, 0.22), 1px 1px 0px #000; }
+.text-green { color: var(--accent-green); text-shadow: 0 0 4px rgba(0, 255, 136, 0.22), 1px 1px 0px #000; }
+.text-blue { color: var(--accent-blue); text-shadow: 0 0 4px rgba(59, 130, 246, 0.22), 1px 1px 0px #000; }
+.text-cosmic { color: #3b82f6; text-shadow: 0 0 4px rgba(59, 130, 246, 0.25), 1px 1px 0px #000; }
 
 .badge {
     display: inline-block;
