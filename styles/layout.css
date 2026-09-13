@@ -964,6 +964,7 @@ body.modal-open .floating-clan-btn {
 .stat-icon-purple { color: var(--accent-purple); border-color: rgba(199, 36, 177, 0.25); background: rgba(199, 36, 177, 0.05); }
 .stat-icon-red { color: var(--accent-red); border-color: rgba(255, 51, 102, 0.25); background: rgba(255, 51, 102, 0.05); }
 .stat-icon-green { color: var(--accent-green); border-color: rgba(0, 255, 136, 0.25); background: rgba(0, 255, 136, 0.05); }
+.stat-icon-cosmic { color: var(--accent-blue); border-color: rgba(59, 130, 246, 0.35); background: rgba(37, 99, 235, 0.12); box-shadow: 0 0 10px rgba(37, 99, 235, 0.25); }
 
 .member-trophies-container {
     display: inline-flex;
