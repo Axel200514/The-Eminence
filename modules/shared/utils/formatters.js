@@ -34,8 +34,13 @@ export function getBrawlerIconUrl(brawlerId) {
     return `https://cdn.brawlify.com/brawlers/borderless/${brawlerId}.png`;
 }
 
-export function getRankedIconUrl(rankName) {
-    if (!rankName) return 'https://cdn.brawlify.com/ranked/regular/Bronze.png';
+export function getRankedIconUrl(rankName, basePath) {
+    if (!basePath) {
+        basePath = typeof window !== 'undefined' && window.location.pathname.includes('/Clan-2')
+            ? '../../styles/Icons/ranked/'
+            : 'styles/Icons/ranked/';
+    }
+    if (!rankName) return `${basePath}Bronze.png`;
     const league = rankName.split(' ')[0].toLowerCase();
     const map = {
         bronze: 'Bronze',
@@ -47,7 +52,7 @@ export function getRankedIconUrl(rankName) {
         masters: 'Masters'
     };
     const name = map[league] || 'Bronze';
-    return `https://cdn.brawlify.com/ranked/regular/${name}.png`;
+    return `${basePath}${name}.png`;
 }
 
 export function getFameIconUrl(fameTierName, basePath) {
