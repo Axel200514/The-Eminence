@@ -616,7 +616,6 @@ class App {
             document.getElementById('sc-fame').textContent = currentFame;
             document.getElementById('sc-fame-label').textContent = famePoints;
             document.getElementById('sc-fame-icon').src = fameIcon;
-            document.getElementById('sc-hypercharges').textContent = formatNumber(unlockedHypercharges);
             document.getElementById('sc-level').textContent = data.expLevel;
             document.getElementById('sc-xp').textContent = formatNumber(data.expPoints);
             document.getElementById('sc-total-wins').textContent = formatNumber(totalWins);
