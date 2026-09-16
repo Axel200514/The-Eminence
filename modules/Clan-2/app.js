@@ -1,6 +1,6 @@
 import { Clan2Service } from './Services/clan-2.service.js';
 import { ClanService } from '../core/services/clan.service.js';
-import { HistoryService } from '../core/services/history.service.js?v=2.0.40';
+import { HistoryService } from '../core/services/history.service.js?v=2.0.41';
 import { ChartManager } from '../shared/utils/chart.js';
 import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, getRankedIconUrl, getFameIconUrl, initDynamicYear } from '../shared/utils/formatters.js';
 import { ReportManager } from '../shared/utils/report.js';
@@ -70,9 +70,14 @@ class App {
             modal.classList.remove('hidden');
             document.body.classList.add('modal-open');
             if (this.podiumMembersData) {
-                document.getElementById('podium-loading').classList.add('hidden');
-                document.getElementById('podium-content').classList.remove('hidden');
-                this.renderPodiumScope();
+                const loadingEl = document.getElementById('podium-loading');
+                const contentEl = document.getElementById('podium-content');
+                if (loadingEl) loadingEl.classList.add('hidden');
+                if (contentEl) contentEl.classList.remove('hidden');
+                const topList = document.getElementById('podium-top');
+                if (!topList || !topList.hasChildNodes() || this.lastRenderedScope !== (this.currentPodiumScope || 'general') || this.lastRenderedPeriod !== this.currentPodiumPeriod) {
+                    this.renderPodiumScope();
+                }
                 this.showAllWinnersAnnouncement();
             } else {
                 this.loadPodiumData(false);
@@ -108,20 +113,101 @@ class App {
         });
     }
 
-    async switchPodiumPeriod(period) {
-        if (this.podiumCache && this.podiumCache[period]) {
-            this.podiumMembersData = this.podiumCache[period].members;
-            this.isWeekCompleted = this.podiumCache[period].isWeekCompleted;
-            this.cycleDay = this.podiumCache[period].cycleDay;
-            this.renderPodiumScope();
+    processPeriodData(pName, historyList, allMembers) {
+        const historyMap = {};
+        let minRecordTime = Date.now();
+
+        (historyList || []).forEach(h => {
+            if (h.player_tag) {
+                historyMap[h.player_tag] = h;
+                historyMap[h.player_tag.replace(/^#/, '')] = h;
+            }
+            if (h.oldest_record) {
+                const t = new Date(h.oldest_record + 'Z').getTime();
+                if (t < minRecordTime) minRecordTime = t;
+            }
+        });
+
+        const daysSinceStart = (Date.now() - minRecordTime) / (1000 * 60 * 60 * 24);
+        const localDay = new Date().getDay();
+        const daysSinceWed = (localDay - 3 + 7) % 7;
+
+        let isWeekCompleted;
+        let cycleDay;
+        if (pName === 'previous') {
+            isWeekCompleted = true;
+            cycleDay = 7;
         } else {
-            await this.loadPodiumData(false, period);
+            isWeekCompleted = daysSinceWed === 0 || daysSinceStart >= 6.8;
+            cycleDay = daysSinceWed === 0 ? 7 : (daysSinceWed + 1);
         }
+
+        const members = allMembers.map(m => {
+            const clean = m.tag.replace(/^#/, '');
+            const record = historyMap[m.tag] || historyMap[clean];
+            let gain = 0;
+            if (record) {
+                if (pName === 'previous' && record.gain !== undefined) {
+                    gain = record.gain;
+                } else if (record.old_trophies !== undefined) {
+                    gain = m.trophies - record.old_trophies;
+                }
+            }
+            return { ...m, gain };
+        });
+
+        return {
+            members,
+            isWeekCompleted,
+            cycleDay,
+            daysSinceStart
+        };
+    }
+
+    async switchPodiumPeriod(period) {
+        this.currentPodiumPeriod = period;
+        if (this.podiumCache && this.podiumCache[period]) {
+            const cached = this.podiumCache[period];
+            this.podiumMembersData = cached.members;
+            this.isWeekCompleted = cached.isWeekCompleted;
+            this.cycleDay = cached.cycleDay;
+            this.daysSinceStart = cached.daysSinceStart;
+            this.renderPodiumScope();
+            return;
+        }
+
+        if (this.podiumLoadingPromise) {
+            const loading = document.getElementById('podium-loading');
+            const content = document.getElementById('podium-content');
+            if (loading) loading.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
+            await this.podiumLoadingPromise;
+            if (this.podiumCache && this.podiumCache[period]) {
+                const cached = this.podiumCache[period];
+                this.podiumMembersData = cached.members;
+                this.isWeekCompleted = cached.isWeekCompleted;
+                this.cycleDay = cached.cycleDay;
+                this.daysSinceStart = cached.daysSinceStart;
+                this.renderPodiumScope();
+                if (loading) loading.classList.add('hidden');
+                if (content) content.classList.remove('hidden');
+                return;
+            }
+        }
+
+        await this.loadPodiumData(false, period);
     }
 
     async loadPodiumData(isBackground = false, targetPeriod = null) {
-        if (this.isPodiumLoading) return;
-        this.isPodiumLoading = true;
+        if (this.podiumLoadingPromise) {
+            if (!isBackground) {
+                const loading = document.getElementById('podium-loading');
+                const content = document.getElementById('podium-content');
+                if (loading) loading.classList.remove('hidden');
+                if (content) content.classList.add('hidden');
+            }
+            return await this.podiumLoadingPromise;
+        }
 
         const period = targetPeriod || this.currentPodiumPeriod || ((new Date().getDay() === 4 || new Date().getDay() === 5) ? 'previous' : 'current');
         this.currentPodiumPeriod = period;
@@ -130,102 +216,70 @@ class App {
         const content = document.getElementById('podium-content');
         
         if (!isBackground) {
-            loading.classList.remove('hidden');
-            content.classList.add('hidden');
+            if (loading) loading.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
         }
 
-        try {
-            const [clan1Data, clan2Data] = await Promise.all([
-                ClanService.getClanData('80L9UYGQG').catch(() => null),
-                ClanService.getClanData('2CGG8Y229').catch(() => null)
-            ]);
+        this.podiumLoadingPromise = (async () => {
+            try {
+                const [clan1Data, clan2Data] = await Promise.all([
+                    ClanService.getClanData('80L9UYGQG').catch(() => null),
+                    ClanService.getClanData('2CGG8Y229').catch(() => null)
+                ]);
 
-            const clan1Members = (clan1Data?.members || []).map(m => ({ ...m, clanName: clan1Data?.name || 'The Eminence', clanScope: 'clan1' }));
-            const clan2Members = (clan2Data?.members || []).map(m => ({ ...m, clanName: clan2Data?.name || 'The Eminence 2', clanScope: 'clan2' }));
+                const clan1Members = (clan1Data?.members || []).map(m => ({ ...m, clanName: clan1Data?.name || 'The Eminence', clanScope: 'clan1' }));
+                const clan2Members = (clan2Data?.members || []).map(m => ({ ...m, clanName: clan2Data?.name || 'The Eminence 2', clanScope: 'clan2' }));
 
-            const allMembers = [...clan1Members, ...clan2Members];
-            const allTags = allMembers.map(m => m.tag);
+                const allMembers = [...clan1Members, ...clan2Members];
+                const allTags = allMembers.map(m => m.tag);
 
-            if (allTags.length === 0) {
-                if (!isBackground) loading.textContent = "No se pudieron obtener datos de los clanes.";
-                this.isPodiumLoading = false;
-                return;
-            }
-
-            allMembers.forEach(m => {
-                const img = new Image();
-                img.src = getProfileIconUrl(m.icon?.id);
-            });
-
-            const history = await HistoryService.getPodium(allTags, 7, period);
-            const historyMap = {};
-            let minRecordTime = Date.now();
-            
-            history.forEach(h => {
-                if (h.player_tag) {
-                    historyMap[h.player_tag] = h;
-                    historyMap[h.player_tag.replace(/^#/, '')] = h;
+                if (allTags.length === 0) {
+                    if (!isBackground && loading) loading.textContent = "No se pudieron obtener datos de los clanes.";
+                    return;
                 }
-                if (h.oldest_record) {
-                    const t = new Date(h.oldest_record + 'Z').getTime();
-                    if (t < minRecordTime) minRecordTime = t;
+
+
+                const [prevHistory, currHistory] = await Promise.all([
+                    HistoryService.getPodium(allTags, 7, 'previous').catch(e => { console.error("Error prev podium:", e); return []; }),
+                    HistoryService.getPodium(allTags, 7, 'current').catch(e => { console.error("Error curr podium:", e); return []; })
+                ]);
+
+                this.podiumCache = this.podiumCache || {};
+                this.podiumCache['previous'] = this.processPeriodData('previous', prevHistory, allMembers);
+                this.podiumCache['current'] = this.processPeriodData('current', currHistory, allMembers);
+
+                const active = this.podiumCache[this.currentPodiumPeriod] || this.podiumCache['previous'] || this.podiumCache['current'];
+                this.podiumMembersData = active.members;
+                this.isWeekCompleted = active.isWeekCompleted;
+                this.cycleDay = active.cycleDay;
+                this.daysSinceStart = active.daysSinceStart;
+
+                this.currentPodiumScope = this.currentPodiumScope || 'general';
+                this.renderPodiumScope();
+
+                if (loading) loading.classList.add('hidden');
+                if (content) content.classList.remove('hidden');
+
+                const modal = document.getElementById('podium-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    this.showAllWinnersAnnouncement();
                 }
-            });
-            
-            this.daysSinceStart = (Date.now() - minRecordTime) / (1000 * 60 * 60 * 24);
-            const localDay = new Date().getDay();
-            const daysSinceWed = (localDay - 3 + 7) % 7;
-
-            if (period === 'previous') {
-                this.isWeekCompleted = true;
-                this.cycleDay = 7;
-            } else {
-                this.isWeekCompleted = daysSinceWed === 0 || this.daysSinceStart >= 6.8;
-                this.cycleDay = daysSinceWed === 0 ? 7 : (daysSinceWed + 1);
+            } catch (e) {
+                console.error("Error loading podium:", e);
+                if (!isBackground && loading) loading.textContent = "Error calculando el podio.";
+            } finally {
+                this.podiumLoadingPromise = null;
             }
+        })();
 
-            this.podiumMembersData = allMembers.map(m => {
-                const clean = m.tag.replace(/^#/, '');
-                const record = historyMap[m.tag] || historyMap[clean];
-                let gain = 0;
-                if (record) {
-                    if (period === 'previous' && record.gain !== undefined) {
-                        gain = record.gain;
-                    } else if (record.old_trophies !== undefined) {
-                        gain = m.trophies - record.old_trophies;
-                    }
-                }
-                return { ...m, gain };
-            });
-
-            this.podiumCache = this.podiumCache || {};
-            this.podiumCache[period] = {
-                members: this.podiumMembersData,
-                isWeekCompleted: this.isWeekCompleted,
-                cycleDay: this.cycleDay
-            };
-
-            this.currentPodiumScope = this.currentPodiumScope || 'general';
-            this.renderPodiumScope();
-
-            loading.classList.add('hidden');
-            content.classList.remove('hidden');
-
-            const modal = document.getElementById('podium-modal');
-            if (modal && !modal.classList.contains('hidden')) {
-                this.showAllWinnersAnnouncement();
-            }
-        } catch (e) {
-            console.error("Error loading podium:", e);
-            if (!isBackground) loading.textContent = "Error calculando el podio.";
-        } finally {
-            this.isPodiumLoading = false;
-        }
+        return await this.podiumLoadingPromise;
     }
 
     renderPodiumScope() {
         if (!this.podiumMembersData) return;
         const scope = this.currentPodiumScope || 'general';
+        this.lastRenderedScope = scope;
+        this.lastRenderedPeriod = this.currentPodiumPeriod;
         const topList = document.getElementById('podium-top');
         const bottomList = document.getElementById('podium-bottom');
         const titleEl = document.getElementById('podium-scope-title');
@@ -362,7 +416,9 @@ class App {
                 titleEl.classList.remove('text-gold');
                 titleEl.classList.add('text-neon');
             } else {
-                titleEl.textContent = '🏆 GANADORES DE LA SEMANA 🏆';
+                titleEl.textContent = this.currentPodiumPeriod === 'previous'
+                    ? '🏆 GANADORES DE LA SEMANA PASADA 🏆'
+                    : '🏆 GANADORES DE LA SEMANA 🏆';
                 titleEl.classList.remove('text-neon');
                 titleEl.classList.add('text-gold');
             }
@@ -395,7 +451,7 @@ class App {
             const colors = ['#ffcf33', '#ff003c', '#009dff', '#00ff66', '#d000ff'];
             const frag = document.createDocumentFragment();
             
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 28; i++) {
                 const confNode = confettiTemplate.content.cloneNode(true);
                 const conf = confNode.querySelector('.confetti-piece');
                 
@@ -800,8 +856,6 @@ function initOrbitAnimation(clanData) {
         name: '🪷アレックス🪷',
         icon: { id: 28000889 }
     };
-    
-    // Filtramos a los que ya están en la lista para evitar duplicados
     const usedTags = new Set([userAcc.tag]);
     
     const president = members.find(m => m.role === 'president' && !usedTags.has(m.tag)) || members.find(m => !usedTags.has(m.tag));
