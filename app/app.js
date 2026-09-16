@@ -1,5 +1,5 @@
 import { ClanService } from '../modules/core/services/clan.service.js';
-import { HistoryService } from '../modules/core/services/history.service.js';
+import { HistoryService } from '../modules/core/services/history.service.js?v=2.0.40';
 import { ChartManager } from '../modules/shared/utils/chart.js';
 import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, getRankedIconUrl, getFameIconUrl, initDynamicYear } from '../modules/shared/utils/formatters.js';
 import { ReportManager } from '../modules/shared/utils/report.js';
@@ -161,7 +161,10 @@ class App {
             let minRecordTime = Date.now();
             
             history.forEach(h => {
-                historyMap[h.player_tag] = h;
+                if (h.player_tag) {
+                    historyMap[h.player_tag] = h;
+                    historyMap[h.player_tag.replace(/^#/, '')] = h;
+                }
                 if (h.oldest_record) {
                     const t = new Date(h.oldest_record + 'Z').getTime();
                     if (t < minRecordTime) minRecordTime = t;
@@ -181,7 +184,8 @@ class App {
             }
 
             this.podiumMembersData = allMembers.map(m => {
-                const record = historyMap[m.tag];
+                const clean = m.tag.replace(/^#/, '');
+                const record = historyMap[m.tag] || historyMap[clean];
                 let gain = 0;
                 if (record) {
                     if (period === 'previous' && record.gain !== undefined) {
