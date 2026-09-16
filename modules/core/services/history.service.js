@@ -7,10 +7,10 @@ export class HistoryService {
         return await HttpService.get(url);
     }
 
-    static async getPodium(tags, days = 7) {
+    static async getPodium(tags, days = 7, period = 'current') {
         const cleanTags = tags.map(t => t.replace(/^#/, '')).join(',');
         const tzOffset = new Date().getTimezoneOffset();
-        const url = `https://the-eminence.pages.dev/getPodium?tags=${cleanTags}&days=${days}&tzOffset=${tzOffset}`;
+        const url = `https://the-eminence.pages.dev/getPodium?tags=${cleanTags}&days=${days}&period=${period}&tzOffset=${tzOffset}`;
         return await HttpService.get(url);
     }
 }
