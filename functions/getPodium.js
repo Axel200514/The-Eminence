@@ -67,27 +67,46 @@ export async function onRequest(context) {
             const { results: rows } = await context.env.DB.prepare(query).bind(...tags, startStr, endStr).all();
             results = rows;
         } else {
-            let dateCondition = '';
+            let query = '';
+            let bindParams = [];
+
             if (days === 7) {
                 const daysToSubtract = daysSinceWed === 0 ? 7 : daysSinceWed;
                 const cutoffDate = new Date(clientTime.getTime() - (daysToSubtract * 24 * 60 * 60 * 1000));
                 const year = cutoffDate.getUTCFullYear();
                 const month = String(cutoffDate.getUTCMonth() + 1).padStart(2, '0');
                 const day = String(cutoffDate.getUTCDate()).padStart(2, '0');
-                dateCondition = `recorded_at >= '${year}-${month}-${day}'`;
+                const cutoffStr = `${year}-${month}-${day} 23:59:59`;
+
+                query = `
+                    SELECT player_tag,
+                           COALESCE(
+                               (SELECT trophies FROM player_history h WHERE h.player_tag = p.player_tag AND h.recorded_at <= ? ORDER BY h.recorded_at DESC LIMIT 1),
+                               (SELECT trophies FROM player_history h WHERE h.player_tag = p.player_tag AND h.recorded_at > ? ORDER BY h.recorded_at ASC LIMIT 1)
+                           ) as old_trophies,
+                           COALESCE(
+                               (SELECT recorded_at FROM player_history h WHERE h.player_tag = p.player_tag AND h.recorded_at <= ? ORDER BY h.recorded_at DESC LIMIT 1),
+                               (SELECT recorded_at FROM player_history h WHERE h.player_tag = p.player_tag AND h.recorded_at > ? ORDER BY h.recorded_at ASC LIMIT 1)
+                           ) as oldest_record
+                    FROM (
+                        SELECT DISTINCT player_tag FROM player_history WHERE player_tag IN (${placeholders})
+                    ) p
+                `;
+                bindParams = [cutoffStr, cutoffStr, cutoffStr, cutoffStr, ...tags];
             } else {
                 const dateModifier = days === 9999 ? `'-100 years'` : `'-${days} days'`;
-                dateCondition = `recorded_at >= datetime('now', ${dateModifier})`;
+                const dateCondition = `recorded_at >= datetime('now', ${dateModifier})`;
+
+                query = `
+                    SELECT player_tag, MIN(recorded_at) as oldest_record, trophies as old_trophies
+                    FROM player_history
+                    WHERE player_tag IN (${placeholders}) AND ${dateCondition}
+                    GROUP BY player_tag
+                `;
+                bindParams = [...tags];
             }
 
-            const query = `
-                SELECT player_tag, MIN(recorded_at) as oldest_record, trophies as old_trophies
-                FROM player_history
-                WHERE player_tag IN (${placeholders}) AND ${dateCondition}
-                GROUP BY player_tag
-            `;
-
-            const { results: rows } = await context.env.DB.prepare(query).bind(...tags).all();
+            const { results: rows } = await context.env.DB.prepare(query).bind(...bindParams).all();
             results = rows;
         }
 

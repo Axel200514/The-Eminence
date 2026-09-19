@@ -1,5 +1,5 @@
 import { ClanService } from '../modules/core/services/clan.service.js';
-import { HistoryService } from '../modules/core/services/history.service.js?v=2.0.41';
+import { HistoryService } from '../modules/core/services/history.service.js?v=2.0.43';
 import { ChartManager } from '../modules/shared/utils/chart.js';
 import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, getRankedIconUrl, getFameIconUrl, initDynamicYear } from '../modules/shared/utils/formatters.js';
 import { ReportManager } from '../modules/shared/utils/report.js';
@@ -60,7 +60,7 @@ class App {
         if (!btn || !modal) return;
 
         btn.onmouseenter = () => {
-            if (!this.podiumMembersData && !this.isPodiumLoading) {
+            if (!this.podiumMembersData && !this.podiumLoadingPromise) {
                 this.loadPodiumData(true);
             }
         };
@@ -138,7 +138,7 @@ class App {
             cycleDay = 7;
         } else {
             isWeekCompleted = daysSinceWed === 0 || daysSinceStart >= 6.8;
-            cycleDay = daysSinceWed === 0 ? 7 : (daysSinceWed + 1);
+            cycleDay = daysSinceWed === 0 ? 7 : daysSinceWed;
         }
 
         const members = allMembers.map(m => {
@@ -146,10 +146,12 @@ class App {
             const record = historyMap[m.tag] || historyMap[clean];
             let gain = 0;
             if (record) {
-                if (pName === 'previous' && record.gain !== undefined) {
-                    gain = record.gain;
+                if (pName === 'previous') {
+                    gain = record.gain !== undefined ? record.gain : ((record.end_trophies || 0) - (record.old_trophies || 0));
                 } else if (record.old_trophies !== undefined) {
                     gain = m.trophies - record.old_trophies;
+                } else if (record.gain !== undefined) {
+                    gain = record.gain;
                 }
             }
             return { ...m, gain };
@@ -244,24 +246,32 @@ class App {
                 ]);
 
                 this.podiumCache = this.podiumCache || {};
-                this.podiumCache['previous'] = this.processPeriodData('previous', prevHistory, allMembers);
-                this.podiumCache['current'] = this.processPeriodData('current', currHistory, allMembers);
+                if (prevHistory && prevHistory.length > 0) {
+                    this.podiumCache['previous'] = this.processPeriodData('previous', prevHistory, allMembers);
+                }
+                if (currHistory && currHistory.length > 0) {
+                    this.podiumCache['current'] = this.processPeriodData('current', currHistory, allMembers);
+                }
 
                 const active = this.podiumCache[this.currentPodiumPeriod] || this.podiumCache['previous'] || this.podiumCache['current'];
-                this.podiumMembersData = active.members;
-                this.isWeekCompleted = active.isWeekCompleted;
-                this.cycleDay = active.cycleDay;
-                this.daysSinceStart = active.daysSinceStart;
+                if (active) {
+                    this.podiumMembersData = active.members;
+                    this.isWeekCompleted = active.isWeekCompleted;
+                    this.cycleDay = active.cycleDay;
+                    this.daysSinceStart = active.daysSinceStart;
 
-                this.currentPodiumScope = this.currentPodiumScope || 'general';
-                this.renderPodiumScope();
+                    this.currentPodiumScope = this.currentPodiumScope || 'general';
+                    this.renderPodiumScope();
 
-                if (loading) loading.classList.add('hidden');
-                if (content) content.classList.remove('hidden');
+                    if (loading) loading.classList.add('hidden');
+                    if (content) content.classList.remove('hidden');
 
-                const modal = document.getElementById('podium-modal');
-                if (modal && !modal.classList.contains('hidden')) {
-                    this.showAllWinnersAnnouncement();
+                    const modal = document.getElementById('podium-modal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        this.showAllWinnersAnnouncement();
+                    }
+                } else {
+                    if (!isBackground && loading) loading.textContent = "No se pudieron calcular estadísticas del podio.";
                 }
             } catch (e) {
                 console.error("Error loading podium:", e);
