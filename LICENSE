@@ -1,0 +1,31 @@
+Copyright (c) 2026 Axel (Axel200514). All rights reserved.
+
+PROPRIETARY SOURCE CODE & INTELLECTUAL PROPERTY NOTICE
+
+1. Ownership of Source Code & Design:
+All original source code, frontend architecture, UI/UX design, stylesheets, layout structures, animations, and application logic in this repository are the exclusive intellectual property of Axel (Axel200514).
+
+2. Permitted Use & Restrictions:
+This repository is maintained for personal portfolio display, educational code review, and technical demonstration purposes. Any unauthorized copying, cloning, modification, republication, redistribution, sublicensing, or commercial exploitation of this software, its design, or its codebase structure, in whole or in part, is strictly prohibited without prior written permission from the author.
+
+
+DISCLAIMER OF LIABILITY (THIRD-PARTY ACTS & SOFTWARE AS-IS)
+
+3. No Warranty & Limitation of Liability:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE AUTHOR (AXEL200514) OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, LOSSES, LIABILITIES, OR LEGAL CONSEQUENCES WHATSOEVER, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE, MISUSE, ABUSE, OR REPLICATION OF THE SOFTWARE BY ANY THIRD PARTIES.
+
+If third parties clone, fork, modify, execute, or deploy this code, they do so entirely at their own risk. The author assumes zero liability for any actions, violations, or damages caused by third parties.
+
+
+THIRD-PARTY CONTENT, PUBLIC DATA & SUPERCELL FAN CONTENT POLICY
+
+4. Supercell Fan Content Disclaimer:
+This content is not affiliated with, endorsed, sponsored, or specifically approved by Supercell and Supercell is not responsible for it. For more information see Supercell's Fan Content Policy: https://supercell.com/en/fan-content-policy/
+
+5. Trademarks & Game Assets:
+Brawl Stars, its logos, brawler names, rank/fame icons, and related trademarks remain the exclusive property and copyright of Supercell Oy. No affiliation, endorsement, or ownership over any Supercell intellectual property is claimed.
+
+6. Public Data & Client-Side Exports:
+Clan and player metrics displayed in this application are sourced from public game data for non-commercial community tracking. All generated exports (PDF audit reports, CSV rosters, and PNG stat cards) are processed locally in the user's browser.
