@@ -1,16 +1,31 @@
 export class HttpService {
-    static async get(url) {
+    static async get(url, { signal } = {}) {
         const response = await fetch(url, {
             headers: {
                 'Accept': 'application/json'
-            }
+            },
+            signal
         });
 
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.error || `HTTP Error: ${response.status}`);
+        const text = await response.text();
+        let payload = null;
+        if (text) {
+            try {
+                payload = JSON.parse(text);
+            } catch {
+                payload = null;
+            }
         }
 
-        return await response.json();
+        if (!response.ok) {
+            const msg = payload?.error || `HTTP Error: ${response.status}`;
+            throw new Error(msg);
+        }
+
+        if (payload === null) {
+            throw new Error('Respuesta JSON inválida del servidor');
+        }
+
+        return payload;
     }
 }
