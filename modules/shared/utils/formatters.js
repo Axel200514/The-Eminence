@@ -1,5 +1,5 @@
 export function formatNumber(num) {
-    if (typeof num !== 'number') return '0';
+    if (typeof num !== 'number' || Number.isNaN(num)) return '0';
     return new Intl.NumberFormat('es-NI').format(num);
 }
 
@@ -34,12 +34,7 @@ export function getBrawlerIconUrl(brawlerId) {
     return `https://cdn.brawlify.com/brawlers/borderless/${brawlerId}.png`;
 }
 
-export function getRankedIconUrl(rankName, basePath) {
-    if (!basePath) {
-        basePath = typeof window !== 'undefined' && window.location.pathname.includes('/Clan-2')
-            ? '../../styles/Icons/ranked/'
-            : 'styles/Icons/ranked/';
-    }
+export function getRankedIconUrl(rankName, basePath = 'styles/Icons/ranked/') {
     if (!rankName) return `${basePath}Bronze.png`;
     const league = rankName.split(' ')[0].toLowerCase();
     const map = {
@@ -55,12 +50,7 @@ export function getRankedIconUrl(rankName, basePath) {
     return `${basePath}${name}.png`;
 }
 
-export function getFameIconUrl(fameTierName, basePath) {
-    if (!basePath) {
-        basePath = typeof window !== 'undefined' && window.location.pathname.includes('/Clan-2')
-            ? '../../styles/Icons/fame/'
-            : 'styles/Icons/fame/';
-    }
+export function getFameIconUrl(fameTierName, basePath = 'styles/Icons/fame/') {
     if (!fameTierName) return `${basePath}global.png`;
     const tier = fameTierName.toLowerCase();
     if (tier.includes('starr') || tier.includes('force')) return `${basePath}starrforce.png`;
@@ -73,12 +63,45 @@ export function getFameIconUrl(fameTierName, basePath) {
     return `${basePath}global.png`;
 }
 
+export function parseUtcDate(dateStr) {
+    if (!dateStr) return null;
+    if (dateStr instanceof Date) {
+        return Number.isNaN(dateStr.getTime()) ? null : dateStr;
+    }
+    const str = String(dateStr).trim();
+    if (!str) return null;
+
+    let normalized = str;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        normalized = `${str}T00:00:00Z`;
+    } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(str) && !str.includes('T')) {
+        normalized = str.replace(' ', 'T');
+        if (!normalized.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(normalized)) {
+            normalized += 'Z';
+        }
+    }
+
+    const parsed = new Date(normalized);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function getLocalDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+export function escapeCsvCell(value) {
+    const text = String(value ?? '').replace(/"/g, '""');
+    return `"${text}"`;
+}
+
 export function initDynamicYear() {
     const startYear = 2026;
     const currentYear = new Date().getFullYear();
     const yearText = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
-    document.querySelectorAll('.copyright-year').forEach(el => {
+    document.querySelectorAll('.copyright-year').forEach((el) => {
         el.textContent = yearText;
     });
 }
-

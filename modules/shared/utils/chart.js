@@ -1,36 +1,58 @@
+import { parseUtcDate } from './formatters.js?v=2.1.0';
+
 export class ChartManager {
     static instances = {};
 
-    static render(canvasId, type, dataArray, label, color) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
-        
-        if (this.instances[canvasId]) {
-            this.instances[canvasId].destroy();
-        }
+    static setEmptyState(canvas, message) {
+        const container = canvas?.parentElement;
+        if (!container) return;
 
-        if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
+        let emptyEl = container.querySelector('.chart-empty-state');
+        if (!message) {
+            if (emptyEl) emptyEl.remove();
             return;
         }
 
-        const parseDate = (dateStr) => {
-            if (!dateStr) return new Date();
-            if (typeof dateStr === 'string' && dateStr.includes(' ') && !dateStr.includes('T')) {
-                return new Date(dateStr.replace(' ', 'T') + 'Z');
-            }
-            return new Date(dateStr);
-        };
+        if (!emptyEl) {
+            emptyEl = document.createElement('div');
+            emptyEl.className = 'chart-empty-state';
+            container.appendChild(emptyEl);
+        }
+        emptyEl.textContent = message;
+    }
+
+    static render(canvasId, type, dataArray, label, color, emptyMessage = 'Sin datos históricos en este período.') {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        if (this.instances[canvasId]) {
+            this.instances[canvasId].destroy();
+            delete this.instances[canvasId];
+        }
+
+        if (!dataArray || !Array.isArray(dataArray) || dataArray.length === 0) {
+            this.setEmptyState(canvas, emptyMessage);
+            return;
+        }
 
         const dailyMap = {};
-        dataArray.forEach(d => {
+
+        dataArray.forEach((d) => {
             if (!d || !d.recorded_at) return;
-            const parsed = parseDate(d.recorded_at);
+            const parsed = parseUtcDate(d.recorded_at);
+            if (!parsed) return;
             const dateStr = parsed.toLocaleDateString();
             dailyMap[dateStr] = { ...d, _parsedDate: parsed };
         });
-        const cleanData = Object.values(dailyMap).sort((a,b) => a._parsedDate - b._parsedDate);
 
-        if (cleanData.length === 0) return;
+        const cleanData = Object.values(dailyMap).sort((a, b) => a._parsedDate - b._parsedDate);
+
+        if (cleanData.length === 0) {
+            this.setEmptyState(canvas, emptyMessage);
+            return;
+        }
+
+        this.setEmptyState(canvas, null);
 
         if (cleanData.length === 1) {
             const fakeData = { ...cleanData[0] };
@@ -40,11 +62,11 @@ export class ChartManager {
             cleanData.unshift(fakeData);
         }
 
-        const labels = cleanData.map(d => d._parsedDate.toLocaleDateString(undefined, {month:'short', day:'numeric'}));
-        const data = cleanData.map(d => type === 'clan' ? d.total_trophies : d.trophies);
+        const labels = cleanData.map((d) => d._parsedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+        const data = cleanData.map((d) => (type === 'clan' ? d.total_trophies : d.trophies));
 
         const yAxisConfig = {
-            ticks: { color: '#8b949e' }, 
+            ticks: { color: '#8b949e' },
             grid: { color: 'rgba(255,255,255,0.05)' },
             grace: '5%'
         };
@@ -52,10 +74,10 @@ export class ChartManager {
         this.instances[canvasId] = new Chart(canvas, {
             type: 'line',
             data: {
-                labels: labels,
+                labels,
                 datasets: [{
-                    label: label,
-                    data: data,
+                    label,
+                    data,
                     borderColor: color,
                     backgroundColor: color.replace('1)', '0.1)'),
                     borderWidth: 3,
@@ -72,8 +94,8 @@ export class ChartManager {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { 
-                        mode: 'index', 
+                    tooltip: {
+                        mode: 'index',
                         intersect: false,
                         backgroundColor: 'rgba(11, 14, 20, 0.9)',
                         titleColor: '#66fcf1',
