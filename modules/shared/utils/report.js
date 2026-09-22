@@ -1,12 +1,50 @@
-const API_BASE = 'https://the-eminence.pages.dev';
+import { ClanService } from '../../core/services/clan.service.js?v=2.1.0';
+import { HistoryService } from '../../core/services/history.service.js?v=2.1.0';
+import { getLocalDateString } from './formatters.js?v=2.1.0';
+import { ensureHtml2Canvas, ensureJsPdf } from './script-loader.js?v=2.1.0';
 
 export class ReportManager {
-    constructor(getClanDataFn = null, clanTag = '80L9UYGQG') {
+    constructor(getClanDataFn = null, clanTag = '80L9UYGQG', clanName = 'The Eminence') {
         this.getClanDataFn = getClanDataFn;
         this.clanTag = clanTag;
+        this.clanName = clanName;
         this.availableDates = [];
         this.isLoadingDates = false;
         this.setupUI();
+    }
+
+    setClan(clanTag, clanName = 'The Eminence') {
+        const normalizedNew = String(clanTag || '').replace(/^#/, '').toUpperCase();
+        const normalizedOld = String(this.clanTag || '').replace(/^#/, '').toUpperCase();
+        this.clanTag = clanTag;
+        this.clanName = clanName;
+        if (normalizedNew !== normalizedOld) {
+            this.availableDates = [];
+            this.clearError();
+            document.getElementById('report-preview-container')?.classList.add('hidden');
+            document.getElementById('btn-download-pdf')?.classList.add('hidden');
+        }
+    }
+
+    showError(message) {
+        const errorEl = document.getElementById('report-error');
+        if (!errorEl) return;
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    }
+
+    clearError() {
+        const errorEl = document.getElementById('report-error');
+        if (!errorEl) return;
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+    }
+
+    closeModal() {
+        const modal = document.getElementById('report-modal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
     }
 
     setupUI() {
@@ -20,12 +58,8 @@ export class ReportManager {
 
         if (!btnOpen || !modal) return;
 
-        const closeModal = () => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('modal-open');
-        };
-
         btnOpen.onclick = () => {
+            this.clearError();
             modal.classList.remove('hidden');
             document.body.classList.add('modal-open');
             if (this.availableDates.length === 0 && !this.isLoadingDates) {
@@ -33,20 +67,15 @@ export class ReportManager {
             }
         };
 
-        if (btnClose) btnClose.onclick = closeModal;
+        if (btnClose) btnClose.onclick = () => this.closeModal();
 
         modal.onclick = (e) => {
-            if (e.target === modal) closeModal();
+            if (e.target === modal) this.closeModal();
         };
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-                closeModal();
-            }
-        });
 
         if (typeSelect) {
             typeSelect.onchange = () => {
+                this.clearError();
                 document.getElementById('report-preview-container')?.classList.add('hidden');
                 document.getElementById('btn-download-pdf')?.classList.add('hidden');
                 if (this.availableDates.length === 0 && !this.isLoadingDates) {
@@ -59,6 +88,7 @@ export class ReportManager {
 
         if (dateSelect) {
             dateSelect.onchange = () => {
+                this.clearError();
                 document.getElementById('report-preview-container')?.classList.add('hidden');
                 document.getElementById('btn-download-pdf')?.classList.add('hidden');
             };
@@ -84,14 +114,9 @@ export class ReportManager {
         dateSelect.appendChild(loadingOption);
 
         try {
-            const cleanTag = this.clanTag.replace(/^#/, '');
-            const res = await fetch(`${API_BASE}/getHistory?type=clan&tag=${cleanTag}&days=9999`);
-            if (!res.ok) throw new Error('Network response was not ok');
-            const data = await res.json();
-            
-            const uniqueDates = [...new Set(data.map(d => d.recorded_at.split(' ')[0]))];
+            const dates = await HistoryService.getAvailableDates(this.clanTag);
+            const uniqueDates = [...new Set((dates || []).filter(Boolean))];
             this.availableDates = uniqueDates.sort().reverse();
-            
             this.populateDateSelect();
         } catch (e) {
             console.error(e);
@@ -101,6 +126,7 @@ export class ReportManager {
             option.textContent = 'Error cargando fechas';
             dateSelect.appendChild(option);
             if (btnGenerate) btnGenerate.disabled = true;
+            this.showError('No se pudieron cargar las fechas disponibles para este clan.');
         } finally {
             this.isLoadingDates = false;
         }
@@ -123,7 +149,7 @@ export class ReportManager {
 
         if (btnGenerate) btnGenerate.disabled = false;
 
-        const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
         if (type === 'weekly') {
             let i = 0;
@@ -133,21 +159,21 @@ export class ReportManager {
 
             while (i < this.availableDates.length && weeksCount < 24) {
                 const newerDate = this.availableDates[i];
-                const targetDateObj = new Date(newerDate);
-                targetDateObj.setDate(targetDateObj.getDate() - 7);
+                const targetDateObj = new Date(`${newerDate}T00:00:00Z`);
+                targetDateObj.setUTCDate(targetDateObj.getUTCDate() - 7);
                 const targetOlderDateStr = targetDateObj.toISOString().split('T')[0];
-                
-                let olderDate = this.availableDates[this.availableDates.length - 1]; 
+
+                let olderDate = this.availableDates[this.availableDates.length - 1];
                 for (let j = i; j < this.availableDates.length; j++) {
                     if (this.availableDates[j] <= targetOlderDateStr) {
                         olderDate = this.availableDates[j];
                         break;
                     }
                 }
-                
+
                 const [yearStr, monthStr] = newerDate.split('-');
                 const groupLabel = `${monthNames[parseInt(monthStr, 10) - 1]} ${yearStr}`;
-                
+
                 if (groupLabel !== currentGroupLabel) {
                     currentGroupLabel = groupLabel;
                     currentOptgroup = document.createElement('optgroup');
@@ -170,11 +196,10 @@ export class ReportManager {
             }
         } else if (type === 'monthly') {
             const months = new Set();
-            this.availableDates.forEach(d => {
-                const month = d.substring(0, 7);
-                months.add(month);
+            this.availableDates.forEach((d) => {
+                months.add(d.substring(0, 7));
             });
-            
+
             let currentOptgroup = null;
             let currentYearLabel = '';
             let monthsCount = 0;
@@ -182,10 +207,10 @@ export class ReportManager {
             for (const monthStr of months) {
                 if (monthsCount >= 12) break;
 
-                const datesInMonth = this.availableDates.filter(d => d.startsWith(monthStr));
+                const datesInMonth = this.availableDates.filter((d) => d.startsWith(monthStr));
                 const newerDate = datesInMonth[0];
                 const olderDate = datesInMonth[datesInMonth.length - 1];
-                
+
                 const [year, monthNum] = monthStr.split('-');
                 if (year !== currentYearLabel) {
                     currentYearLabel = year;
@@ -218,38 +243,31 @@ export class ReportManager {
         const btnGenerate = document.getElementById('btn-generate-report');
         if (btnGenerate) btnGenerate.disabled = true;
 
+        this.clearError();
         document.getElementById('report-loading').classList.remove('hidden');
         document.getElementById('report-preview-container').classList.add('hidden');
         document.getElementById('btn-download-pdf').classList.add('hidden');
 
         try {
-            let clanData = (typeof this.getClanDataFn === 'function') ? this.getClanDataFn() : null;
+            const clanData = (typeof this.getClanDataFn === 'function') ? this.getClanDataFn() : null;
             let members = clanData?.members || clanData?.memberList || [];
 
             if (!members || members.length === 0) {
-                const cleanTag = this.clanTag.replace(/^#/, '');
-                const clanRes = await fetch(`${API_BASE}/getClan?tag=${cleanTag}`);
-                if (clanRes.ok) {
-                    const fetchedClan = await clanRes.json();
-                    members = fetchedClan.members || fetchedClan.memberList || [];
-                }
+                const fetchedClan = await ClanService.getClanData(this.clanTag);
+                members = fetchedClan.members || fetchedClan.memberList || [];
             }
 
             if (!members || members.length === 0) {
                 throw new Error('No se pudieron obtener los miembros del clan actual.');
             }
 
-            const cleanTags = members.map(m => (m.tag || m.player_tag || '').replace(/^#/, '')).filter(Boolean).join(',');
-            const tagsQuery = cleanTags ? `&tags=${encodeURIComponent(cleanTags)}` : '';
+            const tags = members.map((m) => m.tag || m.player_tag).filter(Boolean);
+            const data = await HistoryService.getReport(start, end, tags);
 
-            const res = await fetch(`${API_BASE}/getReport?start=${start}&end=${end}${tagsQuery}`);
-            if (!res.ok) throw new Error('Error al obtener datos del reporte');
-            const data = await res.json();
-            
             this.renderReport(data, start, end, members);
         } catch (e) {
             console.error(e);
-            alert('Error al generar informe: ' + e.message);
+            this.showError(`Error al generar informe: ${e.message}`);
         } finally {
             document.getElementById('report-loading').classList.add('hidden');
             if (btnGenerate) btnGenerate.disabled = false;
@@ -259,18 +277,21 @@ export class ReportManager {
     renderReport(data, start, end, fullMemberList = []) {
         document.getElementById('report-preview-container').classList.remove('hidden');
         document.getElementById('btn-download-pdf').classList.remove('hidden');
+        const titleEl = document.getElementById('report-title-clan');
+        if (titleEl) titleEl.textContent = `Auditoría del Clan: ${this.clanName}`;
         document.getElementById('report-subtitle-print').textContent = `Período: ${start} hasta ${end}`;
 
         const reportType = document.getElementById('report-type-select').value;
-        let threshold = reportType === 'weekly' ? 800 : (reportType === 'monthly' ? 2000 : null);
+        const threshold = reportType === 'weekly' ? 800 : (reportType === 'monthly' ? 2000 : null);
 
         let netGain = 0;
-        let mvpList = [];
+        const mvpList = [];
         let riskCount = 0;
+        let activeWithVariationCount = 0;
         const historyMap = new Map();
         const normalizeTag = (tag) => (tag || '').replace(/^#/, '').toUpperCase();
 
-        data.forEach(p => {
+        (data || []).forEach((p) => {
             const startTrophies = Number.isFinite(Number(p.start_trophies)) ? Number(p.start_trophies) : 0;
             const endTrophies = Number.isFinite(Number(p.end_trophies)) ? Number(p.end_trophies) : startTrophies;
             const gain = endTrophies - startTrophies;
@@ -284,11 +305,12 @@ export class ReportManager {
 
         const membersArray = Array.isArray(fullMemberList) ? fullMemberList : [];
 
-        membersArray.forEach(m => {
+        membersArray.forEach((m) => {
             const tagKey = normalizeTag(m.tag || m.player_tag);
             const record = historyMap.get(tagKey);
             if (record) {
                 netGain += record.gain;
+                if (record.gain !== 0) activeWithVariationCount++;
                 const isRisk = threshold !== null ? record.gain < threshold : record.gain <= 0;
                 if (isRisk) riskCount++;
                 mvpList.push({ ...record, isRisk });
@@ -305,8 +327,9 @@ export class ReportManager {
         });
 
         if (membersArray.length === 0) {
-            historyMap.forEach(record => {
+            historyMap.forEach((record) => {
                 netGain += record.gain;
+                if (record.gain !== 0) activeWithVariationCount++;
                 const isRisk = threshold !== null ? record.gain < threshold : record.gain <= 0;
                 if (isRisk) riskCount++;
                 mvpList.push({ ...record, isRisk });
@@ -319,22 +342,24 @@ export class ReportManager {
         netGainEl.textContent = (netGain > 0 ? '+' : '') + netGain + ' Copas';
         netGainEl.className = netGain >= 0 ? 'gain-good' : 'gain-risk';
 
-        const totalCount = membersArray.length > 0 ? membersArray.length : data.length;
+        const totalCount = membersArray.length > 0 ? membersArray.length : (data || []).length;
         const activeCount = historyMap.size;
-        document.getElementById('report-active-members').textContent = `${activeCount} / ${totalCount} Miembros`;
-        
+        const activeMembersEl = document.getElementById('report-active-members');
+        activeMembersEl.textContent = `${activeCount} / ${totalCount} Miembros`;
+        activeMembersEl.title = `${activeCount} con registro histórico (${activeWithVariationCount} con variación de copas)`;
+
         const riskMembersEl = document.getElementById('report-risk-members');
         riskMembersEl.textContent = reportType === 'global' ? 'N/A' : `${riskCount} Jugadores`;
 
-        const qualifyingMvps = mvpList.filter(p => p.hasRecord && (threshold !== null ? p.gain >= threshold : p.gain > 0));
+        const qualifyingMvps = mvpList.filter((p) => p.hasRecord && (threshold !== null ? p.gain >= threshold : p.gain > 0));
         const mvpPlayers = qualifyingMvps.slice(0, 5);
-        const mvpTags = new Set(mvpPlayers.map(p => normalizeTag(p.player_tag)));
-        const restOfMembers = mvpList.filter(p => !mvpTags.has(normalizeTag(p.player_tag)));
+        const mvpTags = new Set(mvpPlayers.map((p) => normalizeTag(p.player_tag)));
+        const restOfMembers = mvpList.filter((p) => !mvpTags.has(normalizeTag(p.player_tag)));
 
         const mvpContainer = document.getElementById('report-mvp-list');
         const mvpTemplate = document.getElementById('report-mvp-template');
         mvpContainer.textContent = '';
-        
+
         if (mvpTemplate) {
             const mvpFragment = document.createDocumentFragment();
             if (mvpPlayers.length === 0) {
@@ -348,7 +373,7 @@ export class ReportManager {
             } else {
                 mvpPlayers.forEach((p, i) => {
                     const clone = mvpTemplate.content.cloneNode(true);
-                    clone.querySelector('.mvp-name').textContent = `#${i+1} ${p.player_name}`;
+                    clone.querySelector('.mvp-name').textContent = `#${i + 1} ${p.player_name}`;
                     clone.querySelector('.mvp-gain').textContent = (p.gain > 0 ? '+' : '') + p.gain;
                     mvpFragment.appendChild(clone);
                 });
@@ -359,7 +384,7 @@ export class ReportManager {
         const inactiveContainer = document.getElementById('report-inactive-list');
         const inactiveTemplate = document.getElementById('report-inactive-template');
         inactiveContainer.textContent = '';
-        
+
         if (inactiveTemplate) {
             const inactiveFragment = document.createDocumentFragment();
             if (restOfMembers.length === 0) {
@@ -376,7 +401,7 @@ export class ReportManager {
                     const rankNum = i + mvpPlayers.length + 1;
                     clone.querySelector('.inactive-name').textContent = `#${rankNum} ${p.player_name}`;
                     clone.querySelector('.inactive-tag').textContent = p.player_tag;
-                    
+
                     const gainEl = clone.querySelector('.inactive-gain');
                     gainEl.textContent = '';
                     const valSpan = document.createElement('span');
@@ -404,38 +429,34 @@ export class ReportManager {
     async downloadPDF() {
         const btn = document.getElementById('btn-download-pdf');
         const element = document.getElementById('report-content-print');
-        
+
         if (!element) return;
+        this.clearError();
+
         if (btn) {
             btn.disabled = true;
-            btn.textContent = "Procesando...";
+            btn.textContent = 'Procesando...';
         }
 
         try {
-            if (!window.jspdf || !window.jspdf.jsPDF) {
-                throw new Error('La librería jsPDF no está disponible.');
-            }
-            if (typeof html2canvas === 'undefined') {
-                throw new Error('La librería html2canvas no está disponible.');
-            }
-
-            const { jsPDF } = window.jspdf;
+            const [html2canvasFn, JsPDF] = await Promise.all([
+                ensureHtml2Canvas(),
+                ensureJsPdf()
+            ]);
 
             if (document.fonts && document.fonts.ready) {
                 await document.fonts.ready;
             }
 
-            const canvas = await html2canvas(element, { 
+            const canvas = await html2canvasFn(element, {
                 scale: 2,
                 backgroundColor: '#14151f',
                 useCORS: true,
                 scrollX: 0,
                 scrollY: 0,
                 windowWidth: 1200,
-                windowHeight: 5000,
                 onclone: (clonedDoc) => {
                     clonedDoc.body.style.height = 'auto';
-                    clonedDoc.body.style.minHeight = '5000px';
                     clonedDoc.body.style.overflow = 'visible';
                     clonedDoc.body.style.fontFamily = "'Outfit', system-ui, -apple-system, sans-serif";
                     clonedDoc.documentElement.style.height = 'auto';
@@ -469,24 +490,60 @@ export class ReportManager {
                 }
             });
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.98);
-            const pdfWidth = 595.28;
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pageWidth = 595.28;
+            const pageHeight = 841.89;
+            const margin = 20;
+            const contentWidth = pageWidth - (margin * 2);
+            const contentHeightPerPage = pageHeight - (margin * 2);
+            const pxPerPt = canvas.width / contentWidth;
+            const sliceHeightPx = Math.floor(contentHeightPerPage * pxPerPt);
 
-            const doc = new jsPDF('p', 'pt', [pdfWidth, pdfHeight]);
+            const doc = new JsPDF('p', 'pt', 'a4');
+            let offsetY = 0;
+            let pageIndex = 0;
 
-            doc.setFillColor(20, 21, 31);
-            doc.rect(0, 0, pdfWidth, pdfHeight, 'F');
-            doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            while (offsetY < canvas.height) {
+                if (pageIndex > 0) {
+                    doc.addPage('a4', 'p');
+                }
+                doc.setFillColor(20, 21, 31);
+                doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+                const currentSliceHeightPx = Math.min(sliceHeightPx, canvas.height - offsetY);
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = canvas.width;
+                pageCanvas.height = currentSliceHeightPx;
+
+                const ctx = pageCanvas.getContext('2d');
+                ctx.drawImage(
+                    canvas,
+                    0,
+                    offsetY,
+                    canvas.width,
+                    currentSliceHeightPx,
+                    0,
+                    0,
+                    canvas.width,
+                    currentSliceHeightPx
+                );
+
+                const sliceImgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+                const renderHeightPt = currentSliceHeightPx / pxPerPt;
+                doc.addImage(sliceImgData, 'JPEG', margin, margin, contentWidth, renderHeightPt, undefined, 'FAST');
+
+                offsetY += currentSliceHeightPx;
+                pageIndex++;
+            }
+
             const cleanTag = this.clanTag.replace(/^#/, '');
-            doc.save(`Informe_Clan_${cleanTag}_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save(`Informe_Clan_${cleanTag}_${getLocalDateString()}.pdf`);
         } catch (err) {
             console.error('PDF error:', err);
-            alert('Error generando PDF: ' + err.message);
+            this.showError(`Error generando PDF: ${err.message}`);
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = "Descargar PDF";
+                btn.textContent = 'Descargar PDF';
             }
         }
     }
