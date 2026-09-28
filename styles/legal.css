@@ -1,0 +1,136 @@
+.glass-panel {
+    background: var(--bg-secondary);
+    border: var(--border-thick);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-hard);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.clan-main-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    width: fit-content;
+    margin: 0 auto 5px auto;
+}
+
+.text-small {
+    font-size: 0.75rem;
+}
+
+.legal-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+}
+
+.legal-header {
+    margin-bottom: 28px;
+    text-align: center;
+}
+
+.legal-subtitle {
+    margin-top: 8px;
+    font-size: 1rem;
+}
+
+.legal-date {
+    margin-top: 4px;
+}
+
+.legal-card {
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.legal-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+}
+
+.legal-paragraph {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.legal-paragraph strong {
+    color: var(--text-main);
+}
+
+.legal-list {
+    margin-bottom: 16px;
+    padding-left: 20px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.legal-list li {
+    margin-bottom: 8px;
+}
+
+.legal-list li strong {
+    color: var(--text-main);
+}
+
+.legal-subheading {
+    font-size: 1.05rem;
+    margin: 16px 0 10px;
+}
+
+.legal-alert-box {
+    background: rgba(199, 36, 177, 0.1);
+    border-left: 4px solid var(--accent-purple);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.legal-author-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.legal-btn-about {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.legal-nav-link {
+    text-decoration: none;
+    display: inline-block;
+}
+
+.legal-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.legal-btn-back:hover {
+    color: var(--accent-neon);
+    border-color: var(--accent-neon);
+}

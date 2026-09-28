@@ -90,6 +90,16 @@
 .text-green { color: var(--accent-green); text-shadow: 0 0 6px rgba(0, 255, 136, 0.32), 1px 1px 0px #000; }
 .text-blue { color: var(--accent-blue); text-shadow: 0 0 6px rgba(59, 130, 246, 0.32), 1px 1px 0px #000; }
 .text-cosmic { color: #3b82f6; text-shadow: 0 0 6px rgba(59, 130, 246, 0.36), 1px 1px 0px #000; }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.font-bold { font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+    .text-shimmer,
+    .text-shimmer-purple {
+        animation: none;
+    }
+}
 
 .badge {
     display: inline-block;

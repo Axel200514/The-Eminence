@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Términos de Servicio y Privacidad | The Eminence</title>
+    <meta name="description" content="Términos de servicio, política de privacidad y aviso de contenido para fans de The Eminence Brawl Stars Tracker.">
+    <link rel="canonical" href="https://the-eminence.pages.dev/legal.html">
 
-    <link rel="stylesheet" href="styles/variables.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/reset.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/layout.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/utilities.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/animations.css?v=2.0.43">
+    <link rel="stylesheet" href="styles/variables.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/reset.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/navbar.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/legal.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/utilities.css?v=2.1.0">
     <link rel="icon" href="favicon.ico" sizes="any">
-    <link rel="icon" href="styles/Icons/Logo.png" type="image/png">
+    <link rel="icon" href="styles/Icons/Logo.webp" type="image/webp">
 </head>
 <body>
     <header class="app-navbar">
@@ -109,7 +111,7 @@
 
             <div class="legal-alert-box">
                 <strong>Aviso de exención de responsabilidad de Supercell:</strong><br>
-                Este material no es oficial y no está respaldado por Supercell. Para obtener más información, consulte la 
+                Este material no es oficial y no está respaldado por Supercell. Para obtener más información, consulte la
                 <a href="https://supercell.com/en/fan-content-policy/es/" target="_blank" rel="noopener noreferrer" class="footer-link">Política de contenido para fans de Supercell</a>.
             </div>
 
@@ -152,14 +154,6 @@
         </div>
     </footer>
 
-    <script>
-        const startYear = 2026;
-        const currentYear = new Date().getFullYear();
-        const yearText = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
-        document.querySelectorAll('.copyright-year').forEach(el => {
-            el.textContent = yearText;
-        });
-    </script>
+    <script type="module" src="modules/shared/utils/legal.js?v=2.1.0"></script>
 </body>
 </html>
-
