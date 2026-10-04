@@ -140,7 +140,10 @@ class App {
             });
             
             this.daysSinceStart = (Date.now() - minRecordTime) / (1000 * 60 * 60 * 24);
-            this.isWeekCompleted = this.daysSinceStart >= 6.8;
+            const localDay = new Date().getDay();
+            const daysSinceWed = (localDay - 3 + 7) % 7;
+            this.isWeekCompleted = daysSinceWed === 0 || this.daysSinceStart >= 6.8;
+            this.cycleDay = daysSinceWed === 0 ? 7 : (daysSinceWed + 1);
 
             this.podiumMembersData = allMembers.map(m => {
                 const oldTrophies = historyMap[m.tag];
@@ -291,7 +294,7 @@ class App {
         const titleEl = clone.querySelector('.winners-title');
         if (titleEl) {
             if (!this.isWeekCompleted) {
-                const day = Math.max(1, Math.ceil(this.daysSinceStart || 1));
+                const day = Math.max(1, Math.min(7, this.cycleDay || Math.ceil(this.daysSinceStart || 1)));
                 titleEl.textContent = `🔥 LÍDERES ACTUALES (DÍA ${day}/7) 🔥`;
                 titleEl.classList.remove('text-gold');
                 titleEl.classList.add('text-neon');
