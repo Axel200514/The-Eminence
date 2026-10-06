@@ -686,11 +686,12 @@ body.modal-open .floating-clan-btn {
 }
 .sc-stat .stat-icon-svg svg,
 .sc-stat .stat-icon-svg img {
-    max-width: 32px;
-    max-height: 32px;
+    max-width: 34px;
+    max-height: 34px;
     width: auto;
     height: auto;
     flex-shrink: 0;
+    object-fit: contain;
 }
 .sc-stat > div:not(.stat-icon-svg) {
     display: flex;
@@ -863,11 +864,19 @@ body.modal-open .floating-clan-btn {
 
 .stat-icon-svg svg,
 .stat-icon-svg img {
-    max-width: 28px;
-    max-height: 28px;
+    max-width: 34px;
+    max-height: 34px;
     width: auto;
     height: auto;
     flex-shrink: 0;
+    object-fit: contain;
+}
+
+.stat-icon-svg img[src*="Record_Trophy"],
+.stat-icon-svg img[src*="fame"],
+.sc-stat .stat-icon-svg img[src*="Record_Trophy"],
+.sc-stat .stat-icon-svg img[src*="fame"] {
+    transform: scale(1.2);
 }
 /* FIX MOBILE TAP HIGHLIGHT BUG */
 * {
@@ -976,8 +985,8 @@ body.modal-open .floating-clan-btn {
 .player-chart-container { padding: 16px; margin-bottom: 32px; }
 
 .stat-icon-asset {
-    max-width: 32px;
-    max-height: 32px;
+    max-width: 34px;
+    max-height: 34px;
     width: auto;
     height: auto;
     filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
