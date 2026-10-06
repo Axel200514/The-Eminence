@@ -34,6 +34,34 @@ export function getBrawlerIconUrl(brawlerId) {
     return `https://cdn.brawlify.com/brawlers/borderless/${brawlerId}.png`;
 }
 
+export function getRankedIconUrl(rankName) {
+    if (!rankName) return 'https://cdn.brawlify.com/ranked/regular/Bronze.png';
+    const league = rankName.split(' ')[0].toLowerCase();
+    const map = {
+        bronze: 'Bronze',
+        silver: 'Silver',
+        gold: 'Gold',
+        diamond: 'Diamond',
+        mythic: 'Mythic',
+        legendary: 'Legendary',
+        masters: 'Masters'
+    };
+    const name = map[league] || 'Bronze';
+    return `https://cdn.brawlify.com/ranked/regular/${name}.png`;
+}
+
+export function getFameIconUrl(fameTierName) {
+    if (!fameTierName) return 'https://cdn.brawlify.com/prestiges/regular/1.png';
+    const tier = fameTierName.toLowerCase();
+    if (tier.includes('alien')) return 'https://cdn.brawlify.com/prestiges/tiered/7.png';
+    if (tier.includes('meteoric')) return 'https://cdn.brawlify.com/prestiges/regular/6.png';
+    if (tier.includes('solar')) return 'https://cdn.brawlify.com/prestiges/regular/5.png';
+    if (tier.includes('saturnian') || tier.includes('saturn')) return 'https://cdn.brawlify.com/prestiges/regular/4.png';
+    if (tier.includes('martian') || tier.includes('mars')) return 'https://cdn.brawlify.com/prestiges/regular/3.png';
+    if (tier.includes('lunar') || tier.includes('moon')) return 'https://cdn.brawlify.com/prestiges/regular/2.png';
+    return 'https://cdn.brawlify.com/prestiges/regular/1.png';
+}
+
 export function initDynamicYear() {
     const startYear = 2026;
     const currentYear = new Date().getFullYear();
