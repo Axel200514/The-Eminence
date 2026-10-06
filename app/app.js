@@ -549,10 +549,46 @@ class App {
             const totalMatchesEstimated = totalWins * 2;
             const hoursSpent = Math.floor((totalMatchesEstimated * 2.5) / 60);
 
+            const brawlers = data.brawlers || [];
+            let unlockedStarPowers = 0;
+            let unlockedGadgets = 0;
+            let unlockedGears = 0;
+            let totalPrestigeTrophies = 0;
+            let prestige1Count = 0;
+            let prestige2Count = 0;
+            let prestige3Count = 0;
+
+            brawlers.forEach(b => {
+                unlockedStarPowers += (b.starPowers || []).length;
+                unlockedGadgets += (b.gadgets || []).length;
+                unlockedGears += (b.gears || []).length;
+
+                const current = b.trophies || 0;
+                const peak = Math.max(current, b.highestTrophies || 0);
+
+                if (current > 1000) {
+                    totalPrestigeTrophies += (current - 1000);
+                }
+
+                if (peak >= 1000) {
+                    prestige1Count++;
+                }
+                if (peak >= 2000) {
+                    prestige2Count++;
+                }
+                if (peak >= 3000) {
+                    prestige3Count++;
+                }
+            });
+
             document.getElementById('sc-name').textContent = data.name;
             document.getElementById('sc-tag').textContent = data.tag;
             document.getElementById('sc-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('sc-highest').textContent = formatNumber(data.highestTrophies);
+            document.getElementById('sc-prestige-trophies').textContent = formatNumber(totalPrestigeTrophies);
+            document.getElementById('sc-prestige-1').textContent = formatNumber(prestige1Count);
+            document.getElementById('sc-prestige-2').textContent = formatNumber(prestige2Count);
+            document.getElementById('sc-prestige-3').textContent = formatNumber(prestige3Count);
             document.getElementById('sc-level').textContent = data.expLevel;
             document.getElementById('sc-xp').textContent = formatNumber(data.expPoints);
             document.getElementById('sc-total-wins').textContent = formatNumber(totalWins);
@@ -595,6 +631,10 @@ class App {
             
             document.getElementById('player-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('player-highest-trophies').textContent = formatNumber(data.highestTrophies);
+            document.getElementById('player-prestige-trophies').textContent = formatNumber(totalPrestigeTrophies);
+            document.getElementById('player-prestige-1').textContent = formatNumber(prestige1Count);
+            document.getElementById('player-prestige-2').textContent = formatNumber(prestige2Count);
+            document.getElementById('player-prestige-3').textContent = formatNumber(prestige3Count);
             document.getElementById('player-level').textContent = data.expLevel;
             document.getElementById('player-xp-points').textContent = formatNumber(data.expPoints);
             
@@ -604,17 +644,6 @@ class App {
             document.getElementById('player-3v3-wins').textContent = formatNumber(total3v3);
             document.getElementById('player-solo-wins').textContent = formatNumber(totalSolo);
             document.getElementById('player-duo-wins').textContent = formatNumber(totalDuo);
-            
-            const brawlers = data.brawlers || [];
-            let unlockedStarPowers = 0;
-            let unlockedGadgets = 0;
-            let unlockedGears = 0;
-            
-            brawlers.forEach(b => {
-                unlockedStarPowers += (b.starPowers || []).length;
-                unlockedGadgets += (b.gadgets || []).length;
-                unlockedGears += (b.gears || []).length;
-            });
             
             document.getElementById('prog-brawlers').textContent = brawlers.length;
             document.getElementById('prog-starpowers').textContent = unlockedStarPowers;
