@@ -243,3 +243,289 @@
 .player-chart-container {
     padding: 16px;
     margin-bottom: 32px;
+}
+
+.progression-container {
+    padding: 20px;
+    margin-bottom: 24px;
+    border-radius: var(--radius-lg);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    position: relative;
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-neon), var(--accent-purple));
+    border-radius: 8px;
+    transition: width 0.5s ease-out;
+}
+
+.progress-bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.progression-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 16px;
+}
+
+.prog-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.prog-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.prog-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.brawlers-title {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.brawlers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 12px;
+}
+
+.brawler-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+}
+
+.brawler-avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+    flex-shrink: 0;
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.brawler-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.brawler-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 6px;
+}
+
+.brawler-name {
+    font-weight: 700;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.brawler-power {
+    background: rgba(248, 113, 113, 0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    padding: 2px 5px;
+    letter-spacing: 0.02em;
+}
+
+.brawler-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+}
+
+.share-card-wrapper {
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+    pointer-events: none;
+    z-index: -9999;
+}
+
+.share-card {
+    width: 1200px;
+    height: auto;
+    min-height: 630px;
+    background: linear-gradient(135deg, #0b0e14 0%, #1a2333 100%);
+    color: #fff;
+    font-family: var(--font-main);
+    padding: 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.share-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(102, 252, 241, 0.2) 0%, transparent 60%);
+    z-index: 0;
+}
+
+.sc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+    border-bottom: 2px solid rgba(102, 252, 241, 0.3);
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+}
+
+.sc-name {
+    font-size: 72px;
+    font-weight: 900;
+    color: #66fcf1;
+    margin: 0;
+}
+
+.sc-tag {
+    font-size: 36px;
+    color: #8b949e;
+}
+
+.sc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    z-index: 1;
+}
+
+.sc-stat {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.sc-stat .stat-icon-svg {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    flex-shrink: 0;
+    border-radius: 12px;
+}
+
+.sc-stat > div:not(.stat-icon-svg) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sc-val {
+    font-size: 30px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+}
+
+.sc-lbl {
+    font-size: 13px;
+    color: #66fcf1;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.sc-footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.3);
+    z-index: 1;
+    letter-spacing: 5px;
+}
+
+@media (hover: hover) {
+    .btn-share-compact:hover {
+        background: rgba(0, 229, 255, 0.18);
+        border-color: var(--accent-neon);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+    }
+
+    .player-stats-grid .stat-card.minimal:hover {
+        transform: translateY(-2px);
+        border-color: rgba(102, 252, 241, 0.3);
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        background: rgba(8, 10, 15, 0.94);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .player-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .player-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .player-stats-grid .stat-card.minimal {
+        padding: 12px 8px;
+        gap: 6px;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .player-stats-grid .stat-value {
+        font-size: 1.15rem;
+    }
+
+    .player-stats-grid .stat-label {
+        font-size: 0.65rem;
+    }
+}
