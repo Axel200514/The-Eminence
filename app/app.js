@@ -583,6 +583,8 @@ class App {
                 }
             });
 
+            const totalPrestigeCount = prestige1Count + prestige2Count + prestige3Count;
+
             const currentRanked = data.rankedRankName || 'Sin Rango';
             const currentRankedElo = data.rankedElo ? `Ranked Actual (${formatNumber(data.rankedElo)})` : 'Ranked Actual';
             const highestRanked = data.highestAllTimeRankedRankName || (data.rankedRankName || 'Sin Rango');
@@ -600,6 +602,7 @@ class App {
             document.getElementById('sc-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('sc-highest').textContent = formatNumber(data.highestTrophies);
             document.getElementById('sc-prestige-trophies').textContent = formatNumber(totalPrestigeTrophies);
+            document.getElementById('sc-total-prestige').textContent = formatNumber(totalPrestigeCount);
             document.getElementById('sc-prestige-1').textContent = formatNumber(prestige1Count);
             document.getElementById('sc-prestige-2').textContent = formatNumber(prestige2Count);
             document.getElementById('sc-prestige-3').textContent = formatNumber(prestige3Count);
@@ -657,6 +660,7 @@ class App {
             document.getElementById('player-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('player-highest-trophies').textContent = formatNumber(data.highestTrophies);
             document.getElementById('player-prestige-trophies').textContent = formatNumber(totalPrestigeTrophies);
+            document.getElementById('player-total-prestige').textContent = formatNumber(totalPrestigeCount);
             document.getElementById('player-prestige-1').textContent = formatNumber(prestige1Count);
             document.getElementById('player-prestige-2').textContent = formatNumber(prestige2Count);
             document.getElementById('player-prestige-3').textContent = formatNumber(prestige3Count);
