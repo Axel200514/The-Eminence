@@ -89,6 +89,7 @@
 .text-red { color: var(--accent-red); text-shadow: 1px 1px 0px #000; }
 .text-green { color: var(--accent-green); text-shadow: 1px 1px 0px #000; }
 .text-blue { color: var(--accent-blue); text-shadow: 1px 1px 0px #000; }
+.text-cosmic { color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 1px 1px 0px #000; }
 
 .badge {
     display: inline-block;
