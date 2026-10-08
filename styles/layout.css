@@ -1136,6 +1136,26 @@ body.modal-open .floating-podium-btn {
     font-weight: 800;
 }
 
+.podium-controls-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.podium-period-tabs .badge:hover {
+    border-color: var(--accent-neon);
+    color: #fff;
+}
+
+.podium-period-tabs .badge.active {
+    background: var(--accent-neon);
+    color: #0b0e14;
+    border-color: var(--accent-neon);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+    font-weight: 800;
+}
+
 .podium-clan-tag-badge {
     background: rgba(255, 215, 0, 0.12);
     border: 1px solid var(--accent-gold);
@@ -1473,6 +1493,12 @@ body.modal-open .floating-podium-btn {
     .podium-modal-content {
         max-width: 100%;
         padding: 20px 14px;
+    }
+
+    .podium-controls-group {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 8px;
     }
 
     .podium-showcase {

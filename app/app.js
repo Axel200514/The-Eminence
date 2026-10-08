@@ -35,6 +35,9 @@ class App {
 
     async init() {
         initDynamicYear();
+        const localDay = new Date().getDay();
+        this.currentPodiumPeriod = (localDay === 4 || localDay === 5) ? 'previous' : 'current';
+        this.podiumCache = {};
         this.setupEvents();
         this.setupPodium();
         await this.loadClan();
@@ -80,6 +83,19 @@ class App {
             document.body.classList.remove('modal-open');
         };
 
+        const periodTabs = document.querySelectorAll('#podium-period-tabs button');
+        periodTabs.forEach(button => {
+            button.classList.toggle('active', button.dataset.period === this.currentPodiumPeriod);
+            button.onclick = () => {
+                const period = button.dataset.period || 'previous';
+                if (this.currentPodiumPeriod === period) return;
+                periodTabs.forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                this.currentPodiumPeriod = period;
+                this.switchPodiumPeriod(period);
+            };
+        });
+
         const tabButtons = document.querySelectorAll('#podium-tabs button');
         tabButtons.forEach(button => {
             button.onclick = () => {
@@ -91,9 +107,23 @@ class App {
         });
     }
 
-    async loadPodiumData(isBackground = false) {
+    async switchPodiumPeriod(period) {
+        if (this.podiumCache && this.podiumCache[period]) {
+            this.podiumMembersData = this.podiumCache[period].members;
+            this.isWeekCompleted = this.podiumCache[period].isWeekCompleted;
+            this.cycleDay = this.podiumCache[period].cycleDay;
+            this.renderPodiumScope();
+        } else {
+            await this.loadPodiumData(false, period);
+        }
+    }
+
+    async loadPodiumData(isBackground = false, targetPeriod = null) {
         if (this.isPodiumLoading) return;
         this.isPodiumLoading = true;
+
+        const period = targetPeriod || this.currentPodiumPeriod || ((new Date().getDay() === 4 || new Date().getDay() === 5) ? 'previous' : 'current');
+        this.currentPodiumPeriod = period;
 
         const loading = document.getElementById('podium-loading');
         const content = document.getElementById('podium-content');
@@ -126,12 +156,12 @@ class App {
                 img.src = getProfileIconUrl(m.icon?.id);
             });
 
-            const history = await HistoryService.getPodium(allTags, 7);
+            const history = await HistoryService.getPodium(allTags, 7, period);
             const historyMap = {};
             let minRecordTime = Date.now();
             
             history.forEach(h => {
-                historyMap[h.player_tag] = h.old_trophies;
+                historyMap[h.player_tag] = h;
                 if (h.oldest_record) {
                     const t = new Date(h.oldest_record + 'Z').getTime();
                     if (t < minRecordTime) minRecordTime = t;
@@ -141,14 +171,34 @@ class App {
             this.daysSinceStart = (Date.now() - minRecordTime) / (1000 * 60 * 60 * 24);
             const localDay = new Date().getDay();
             const daysSinceWed = (localDay - 3 + 7) % 7;
-            this.isWeekCompleted = daysSinceWed === 0 || this.daysSinceStart >= 6.8;
-            this.cycleDay = daysSinceWed === 0 ? 7 : (daysSinceWed + 1);
+
+            if (period === 'previous') {
+                this.isWeekCompleted = true;
+                this.cycleDay = 7;
+            } else {
+                this.isWeekCompleted = daysSinceWed === 0 || this.daysSinceStart >= 6.8;
+                this.cycleDay = daysSinceWed === 0 ? 7 : (daysSinceWed + 1);
+            }
 
             this.podiumMembersData = allMembers.map(m => {
-                const oldTrophies = historyMap[m.tag];
-                const gain = oldTrophies !== undefined ? (m.trophies - oldTrophies) : 0;
+                const record = historyMap[m.tag];
+                let gain = 0;
+                if (record) {
+                    if (period === 'previous' && record.gain !== undefined) {
+                        gain = record.gain;
+                    } else if (record.old_trophies !== undefined) {
+                        gain = m.trophies - record.old_trophies;
+                    }
+                }
                 return { ...m, gain };
             });
+
+            this.podiumCache = this.podiumCache || {};
+            this.podiumCache[period] = {
+                members: this.podiumMembersData,
+                isWeekCompleted: this.isWeekCompleted,
+                cycleDay: this.cycleDay
+            };
 
             this.currentPodiumScope = this.currentPodiumScope || 'general';
             this.renderPodiumScope();
@@ -182,14 +232,23 @@ class App {
         bottomList.replaceChildren();
 
         let filtered = [...this.podiumMembersData];
+        const isPrev = this.currentPodiumPeriod === 'previous';
+        const day = Math.max(1, Math.min(7, this.cycleDay || 1));
         if (scope === 'clan1') {
             filtered = filtered.filter(m => m.clanScope === 'clan1');
-            if (titleEl) titleEl.textContent = '🥇 SALÓN DE LA FAMA (CLAN 1)';
+            if (titleEl) titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (CLAN 1 - SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (CLAN 1 - DÍA ${day}/7)`;
         } else if (scope === 'clan2') {
             filtered = filtered.filter(m => m.clanScope === 'clan2');
-            if (titleEl) titleEl.textContent = '🥇 SALÓN DE LA FAMA (CLAN 2)';
+            if (titleEl) titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (CLAN 2 - SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (CLAN 2 - DÍA ${day}/7)`;
         } else {
-            if (titleEl) titleEl.textContent = '🥇 SALÓN DE LA FAMA (GENERAL)';
+            if (titleEl) titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (GENERAL - DÍA ${day}/7)`;
+        }
+
+        const fantasmonesSub = document.querySelector('.fantasmones-header .text-muted');
+        if (fantasmonesSub) {
+            fantasmonesSub.textContent = isPrev
+                ? 'Menor aporte en copas (Semana cerrada)'
+                : 'Menor aporte en copas (Ciclo actual)';
         }
 
         filtered.sort((a, b) => b.gain - a.gain);
@@ -299,6 +358,8 @@ class App {
                 titleEl.classList.add('text-neon');
             } else {
                 titleEl.textContent = '🏆 GANADORES DE LA SEMANA 🏆';
+                titleEl.classList.remove('text-neon');
+                titleEl.classList.add('text-gold');
             }
         }
         
