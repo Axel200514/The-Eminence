@@ -1,0 +1,91 @@
+.podium-step.rank-1 .podium-avatar {
+    box-shadow: 0 0 22px rgba(255, 215, 0, 0.65), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.podium-step.rank-2 .podium-avatar {
+    box-shadow: 0 0 12px rgba(192, 192, 192, 0.45), 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.podium-step.rank-3 .podium-avatar {
+    box-shadow: 0 0 12px rgba(205, 127, 50, 0.45), 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.podium-step.rank-1 .podium-base {
+    box-shadow: 0 -8px 26px rgba(255, 215, 0, 0.35), inset 0 2px 14px rgba(255, 215, 0, 0.28);
+    text-shadow: 0 0 14px rgba(255, 215, 0, 0.65);
+}
+
+.podium-step.rank-2 .podium-base {
+    text-shadow: 0 0 10px rgba(192, 192, 192, 0.45);
+}
+
+.podium-step.rank-3 .podium-base {
+    text-shadow: 0 0 10px rgba(205, 127, 50, 0.45);
+}
+
+.podium-crown {
+    font-size: 1.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 4px;
+    z-index: 5;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.75)) drop-shadow(0 0 8px rgba(255, 193, 7, 0.4));
+    animation: crownFloat 2.6s ease-in-out infinite;
+    transform: translateZ(0);
+}
+
+@keyframes crownFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.podium-trophy-asset {
+    animation: trophyShine 4s ease-in-out infinite;
+    transform: translateZ(0);
+}
+
+@keyframes trophyShine {
+    0%, 82%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    88% {
+        transform: scale(1.18) rotate(-6deg);
+    }
+    94% {
+        transform: scale(1.08) rotate(4deg);
+    }
+}
+
+.podium-step.rank-1 .podium-player-gain {
+    animation: gainBadgePulse 2.8s ease-in-out infinite;
+    transform: translateZ(0);
+}
+
+@keyframes gainBadgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.04);
+    }
+}
+
+@media (max-width: 480px) {
+    .podium-crown {
+        font-size: 1.45rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .podium-crown,
+    .podium-trophy-asset,
+    .podium-step.rank-1 .podium-player-gain {
+        animation: none !important;
+    }
+}
