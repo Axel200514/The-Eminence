@@ -363,11 +363,15 @@
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 20px;
+    transform: translateZ(0);
+    will-change: opacity;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-content {
@@ -608,7 +612,6 @@ body.modal-open .floating-clan-btn {
         display: inline;
     }
 }
-/* SHARE CARD TEMPLATE (OFF-SCREEN) */
 .share-card-wrapper {
     position: fixed;
     top: -9999px;
@@ -710,7 +713,6 @@ body.modal-open .floating-clan-btn {
     letter-spacing: 5px;
 }
 
-/* PLAYER HERO MODAL STYLES */
 .player-hero {
     display: flex;
     align-items: center;
@@ -878,7 +880,6 @@ body.modal-open .floating-clan-btn {
 .sc-stat .stat-icon-svg img[src*="fame"] {
     transform: scale(1.2);
 }
-/* FIX MOBILE TAP HIGHLIGHT BUG */
 * {
     -webkit-tap-highlight-color: transparent !important;
 }
@@ -887,13 +888,11 @@ body.modal-open .floating-clan-btn {
     user-select: none !important;
     -webkit-user-select: none !important;
 }
-/* AGGRESSIVE TAP HIGHLIGHT & SELECTION REMOVAL */
 .modal-overlay, .modal-content, .loader-container, #modal-loading, #modal-body {
     -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
     -webkit-tap-highlight-color: transparent !important;
     outline: none !important;
 }
-/* MODAL & GLASS PANEL BEHAVIOR */
 .modal-content.glass-panel, .modal-content {
     border: none !important;
     box-shadow: none !important;
@@ -915,7 +914,6 @@ body.modal-open .floating-clan-btn {
     }
 }
 
-/* FIX FLOATING CLAN BUTTON SVG ALIGNMENT */
 .floating-clan-btn {
     border-radius: 9999px !important;
     display: flex !important;
@@ -924,7 +922,6 @@ body.modal-open .floating-clan-btn {
     gap: 8px !important;
 }
 
-/* Base styles for flex alignment */
 .floating-clan-btn .btn-text,
 .floating-clan-btn .btn-short-text {
     align-items: center !important;
@@ -933,7 +930,6 @@ body.modal-open .floating-clan-btn {
     flex-direction: row !important;
 }
 
-/* DESKTOP: Show long text, hide short text */
 @media (min-width: 769px) {
     .floating-clan-btn .btn-text {
         display: flex !important;
@@ -943,7 +939,6 @@ body.modal-open .floating-clan-btn {
     }
 }
 
-/* MOBILE: Hide long text, show short text */
 @media (max-width: 768px) {
     .floating-clan-btn .btn-text {
         display: none !important;
@@ -952,7 +947,6 @@ body.modal-open .floating-clan-btn {
         display: flex !important;
     }
 }
-/* Added utility classes to remove inline styles */
 .stat-icon-theme {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
@@ -994,7 +988,6 @@ body.modal-open .floating-clan-btn {
 }
 
 
-/* Brawler Card Avatar Updates */
 .brawler-card {
     display: flex;
     align-items: center;
@@ -1014,7 +1007,6 @@ body.modal-open .floating-clan-btn {
     min-width: 0;
 }
 
-/* PODIUM STYLES (HIGH RELIEF 3D & RESPONSIVE) */
 .floating-podium-btn {
     position: fixed;
     bottom: 32px;
@@ -1071,22 +1063,48 @@ body.modal-open .floating-podium-btn {
     display: none !important;
 }
 
-/* Modal Shell */
 .podium-modal-content {
     max-width: 860px;
     width: 100%;
+    contain: layout;
 }
 
 .podium-header-banner {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
+    text-align: center;
     gap: 16px;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    padding-right: 56px;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    width: 100%;
+}
+
+.podium-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+}
+
+.podium-title-container .section-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.35rem;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    flex-wrap: wrap;
+}
+
+.podium-header-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
 }
 
 .podium-loading-state {
@@ -1095,65 +1113,149 @@ body.modal-open .floating-podium-btn {
     color: var(--text-muted);
 }
 
-.podium-tabs {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-}
-
-.podium-tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.podium-tabs .badge {
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: var(--bg-tertiary);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.podium-tabs .badge:hover {
-    border-color: var(--accent-gold);
-    color: #fff;
-}
-
-.podium-tabs .badge.active {
-    background: var(--accent-gold);
-    color: #0b0e14;
-    border-color: var(--accent-gold);
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
-    font-weight: 800;
-}
-
 .podium-controls-group {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 12px;
-    flex-wrap: wrap;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
-.podium-period-tabs .badge:hover {
-    border-color: var(--accent-neon);
-    color: #fff;
+.podium-period-tabs .badge,
+.podium-scope-tabs .badge,
+.podium-tabs .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--radius-sm, 4px);
+    background: #1f2538;
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    color: #8f9fad;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    transform: skewX(-8deg);
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9);
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    user-select: none;
+    outline: none;
+    margin: 0 4px;
+}
+
+.podium-period-tabs .badge > *,
+.podium-scope-tabs .badge > *,
+.podium-tabs .badge > * {
+    transform: skewX(8deg);
+}
+
+.podium-period-tabs .badge:hover,
+.podium-scope-tabs .badge:hover,
+.podium-tabs .badge:hover {
+    color: #ffffff;
+    background: #2a334d;
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: skewX(-8deg) translateY(-1px);
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.95);
+}
+
+.podium-period-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 4px 10px;
+    width: 100%;
+}
+
+.podium-period-tabs .badge {
+    padding: 9px 24px;
+    font-size: 0.86rem;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    min-width: 175px;
 }
 
 .podium-period-tabs .badge.active {
-    background: var(--accent-neon);
-    color: #0b0e14;
-    border-color: var(--accent-neon);
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+    background: #00e5ff !important;
+    color: #070a10 !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.55), 2px 2px 0px rgba(0, 0, 0, 0.95);
+    font-weight: 900;
+}
+
+.podium-scope-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 4px 10px;
+    width: 100%;
+}
+
+.podium-scope-tabs .badge {
+    padding: 6px 16px;
+    font-size: 0.78rem;
     font-weight: 800;
+    letter-spacing: 0.5px;
+    min-width: 105px;
+}
+
+.podium-scope-tabs .badge.active {
+    background: #ffc107 !important;
+    color: #070a10 !important;
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 16px rgba(255, 193, 7, 0.45), 2px 2px 0px rgba(0, 0, 0, 0.95);
+    font-weight: 900;
+}
+
+.podium-tab-icon {
+    object-fit: contain;
+    vertical-align: middle;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+.podium-period-tabs .badge .podium-tab-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.podium-scope-tabs .badge .podium-tab-icon {
+    width: 17px;
+    height: 17px;
+}
+
+.podium-period-tabs .badge.active .podium-tab-icon {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+.podium-scope-tabs .badge.active .podium-tab-icon {
+    filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.7));
+}
+
+.podium-showcase-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    flex-wrap: wrap;
+}
+
+.podium-title-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    vertical-align: middle;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
 }
 
 .podium-clan-tag-badge {
@@ -1166,7 +1268,6 @@ body.modal-open .floating-podium-btn {
     border-radius: var(--radius-full);
 }
 
-/* Podium Showcase (Relief & Depth Background) */
 .podium-showcase {
     background: radial-gradient(circle at 50% 20%, rgba(255, 215, 0, 0.09) 0%, rgba(11, 14, 20, 0.85) 75%);
     border: 1px solid rgba(255, 215, 0, 0.25);
@@ -1175,7 +1276,8 @@ body.modal-open .floating-podium-btn {
     padding: 24px 20px 20px;
     margin-bottom: 28px;
     position: relative;
-    overflow: hidden;
+    contain: layout;
+    overflow: visible;
 }
 
 .podium-showcase::after {
@@ -1192,18 +1294,19 @@ body.modal-open .floating-podium-btn {
     text-align: center;
     font-size: 0.95rem;
     letter-spacing: 1px;
-    margin-bottom: 12px;
+    margin-bottom: 30px;
 }
 
-/* Podium 3D Stand */
 .podium-stand {
     display: flex;
     justify-content: center;
     align-items: flex-end;
     gap: 20px;
-    min-height: 270px;
+    min-height: 295px;
     margin: 0 auto;
     max-width: 620px;
+    contain: layout;
+    overflow: visible;
 }
 
 .podium-step {
@@ -1215,6 +1318,7 @@ body.modal-open .floating-podium-btn {
     position: relative;
     cursor: pointer;
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: visible;
 }
 
 .podium-step:hover {
@@ -1226,17 +1330,17 @@ body.modal-open .floating-podium-btn {
 .podium-step.rank-3 { z-index: 3; }
 
 .podium-step.animate {
-    animation: podiumEnter 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    animation: podiumEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
-.podium-step.rank-1.animate { animation-delay: 0.1s; }
-.podium-step.rank-2.animate { animation-delay: 0.2s; }
-.podium-step.rank-3.animate { animation-delay: 0.3s; }
+.podium-step.rank-1.animate { animation-delay: 0.05s; }
+.podium-step.rank-2.animate { animation-delay: 0.12s; }
+.podium-step.rank-3.animate { animation-delay: 0.18s; }
 
 @keyframes podiumEnter {
     from {
         opacity: 0;
-        transform: translateY(60px) scale(0.9);
+        transform: translateY(40px) scale(0.94);
     }
     to {
         opacity: 1;
@@ -1244,20 +1348,6 @@ body.modal-open .floating-podium-btn {
     }
 }
 
-/* Crown Animation */
-.podium-crown {
-    font-size: 1.8rem;
-    margin-bottom: -6px;
-    filter: drop-shadow(0 2px 10px rgba(255, 215, 0, 0.7));
-    animation: crownFloat 2.6s ease-in-out infinite;
-}
-
-@keyframes crownFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-
-/* Pedestals */
 .podium-base {
     width: 100%;
     background: var(--bg-tertiary);
@@ -1297,7 +1387,6 @@ body.modal-open .floating-podium-btn {
     box-shadow: 0 -8px 20px rgba(205, 127, 50, 0.2);
 }
 
-/* Trophy Asset in Podium */
 .podium-trophy-asset {
     width: 15px;
     height: 15px;
@@ -1308,7 +1397,6 @@ body.modal-open .floating-podium-btn {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
 }
 
-/* Avatars */
 .podium-avatar {
     width: 64px;
     height: 64px;
@@ -1333,16 +1421,23 @@ body.modal-open .floating-podium-btn {
 .podium-step.rank-2 .podium-avatar { border-color: #C0C0C0; }
 .podium-step.rank-3 .podium-avatar { border-color: #CD7F32; }
 
-/* Names & Meta */
 .podium-player-name {
     font-weight: 800;
     font-size: 0.95rem;
     text-align: center;
     margin-bottom: 2px;
     width: 100%;
-    white-space: nowrap;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.15;
+    min-height: 2.3em;
     padding: 0 4px;
     color: #fff;
     flex-shrink: 0;
@@ -1379,7 +1474,6 @@ body.modal-open .floating-podium-btn {
 .podium-player-gain.negative { color: var(--accent-red); border-color: rgba(255, 77, 77, 0.3); }
 .podium-player-gain.neutral { color: var(--text-muted); }
 
-/* Fantasmones Section */
 .fantasmones-header {
     display: flex;
     justify-content: space-between;
@@ -1405,6 +1499,7 @@ body.modal-open .floating-podium-btn {
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    contain: layout;
 }
 
 .podium-item:hover {
@@ -1488,8 +1583,14 @@ body.modal-open .floating-podium-btn {
     background: linear-gradient(90deg, rgba(255, 77, 77, 0.06) 0%, var(--bg-tertiary) 100%);
 }
 
-/* MOBILE ADAPTATION */
 @media (max-width: 768px) {
+    .modal-overlay,
+    .winner-announcement-overlay {
+        background: rgba(8, 10, 15, 0.94);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
     .podium-modal-content {
         max-width: 100%;
         padding: 20px 14px;
@@ -1497,8 +1598,9 @@ body.modal-open .floating-podium-btn {
 
     .podium-controls-group {
         width: 100%;
-        justify-content: flex-start;
-        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
     }
 
     .podium-showcase {
@@ -1586,6 +1688,8 @@ body.modal-open .floating-podium-btn {
     opacity: 0;
     border-radius: 4px;
     animation: confettiFall var(--anim-dur, 3s) linear var(--anim-delay, 0s) infinite;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 @keyframes confettiFall {
@@ -1600,14 +1704,14 @@ body.modal-open .floating-podium-btn {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 10, 15, 0.95);
+    background: rgba(10, 10, 15, 0.94);
     z-index: 10000;
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: opacity 0.5s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 0.35s ease;
 }
 
 .winner-announcement-overlay.fade-out {
@@ -1624,7 +1728,7 @@ body.modal-open .floating-podium-btn {
     max-width: 400px;
     text-align: center;
     box-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
-    animation: winnersEnter 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    animation: winnersEnter 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
 @keyframes winnersEnter {
@@ -1738,17 +1842,117 @@ body.modal-open .floating-podium-btn {
 }
 
 @media (max-width: 480px) {
-    .podium-step { width: 105px !important; }
+    .podium-header-banner {
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 14px;
+    }
+
+    .podium-title-container .section-title {
+        font-size: 1.15rem;
+        gap: 6px;
+    }
+
+    .podium-header-icon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .podium-controls-group {
+        gap: 10px;
+    }
+
+    .podium-period-tabs {
+        padding: 3px 6px;
+        gap: 6px;
+    }
+
+    .podium-period-tabs .badge {
+        padding: 7px 12px;
+        font-size: 0.74rem;
+        letter-spacing: 0.3px;
+        min-width: 135px;
+        margin: 0 2px;
+        gap: 6px;
+    }
+
+    .podium-period-tabs .badge .podium-tab-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .podium-scope-tabs {
+        gap: 6px;
+        padding: 2px 4px;
+    }
+
+    .podium-scope-tabs .badge {
+        padding: 5px 10px;
+        font-size: 0.72rem;
+        letter-spacing: 0.3px;
+        min-width: 85px;
+        margin: 0 2px;
+        gap: 5px;
+    }
+
+    .podium-scope-tabs .badge .podium-tab-icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .podium-showcase {
+        padding: 18px 6px 16px !important;
+    }
+
+    .podium-showcase-title {
+        margin-bottom: 24px !important;
+        font-size: clamp(0.76rem, 3.2vw, 0.88rem) !important;
+    }
+
+    .podium-title-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .podium-stand {
+        gap: 4px !important;
+        min-height: 285px !important;
+        width: 100% !important;
+        padding: 0 2px !important;
+    }
+
+    .podium-step {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        max-width: 110px !important;
+        width: auto !important;
+    }
+
+    .podium-step.rank-1 {
+        flex: 1.15 1 0 !important;
+        max-width: 125px !important;
+    }
+
+    .podium-crown {
+        font-size: 1.45rem !important;
+        margin-bottom: 2px !important;
+    }
+
     .podium-step.rank-1 .podium-avatar { width: 60px !important; height: 60px !important; margin-bottom: -15px !important; }
     .podium-step.rank-2 .podium-avatar, .podium-step.rank-3 .podium-avatar { width: 45px !important; height: 45px !important; }
-    .podium-player-name { font-size: 0.75rem !important; }
-    .podium-step.rank-1 .podium-player-name { font-size: 0.85rem !important; }
+    .podium-player-name {
+        font-size: 0.72rem !important;
+        line-height: 1.15 !important;
+        min-height: 2.3em !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+        white-space: normal !important;
+    }
+    .podium-step.rank-1 .podium-player-name { font-size: 0.8rem !important; }
     .podium-player-gain { font-size: 0.75rem !important; }
     .podium-player-clan { font-size: 0.6rem !important; }
-    .podium-stand { gap: 4px !important; }
 }
 
-/* APP FOOTER STYLES */
 .app-footer {
     width: 100%;
     margin-top: 40px;
@@ -1817,7 +2021,6 @@ body.modal-open .floating-podium-btn {
     font-size: 0.8rem;
 }
 
-/* LEGAL PAGE STYLES */
 .legal-container {
     max-width: 900px;
     margin: 0 auto;
