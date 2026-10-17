@@ -165,3 +165,197 @@
     padding: 16px;
     color: var(--text-muted);
 }
+
+.report-mvp-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    table-layout: fixed;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.report-mvp-table td {
+    padding: 8px 18px;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+    vertical-align: middle;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.report-mvp-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-mvp-table .mvp-name {
+    text-align: left;
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    padding-left: 18px;
+}
+
+.report-mvp-table .mvp-gain {
+    text-align: right;
+    color: var(--accent-green);
+    font-weight: 800;
+    font-family: monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    padding-right: 18px;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    table-layout: fixed;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.report-table th,
+.report-table td {
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: middle;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.report-table th {
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.report-table td {
+    color: var(--text-main);
+    background: rgba(20, 21, 31, 0.5);
+}
+
+.report-table tbody tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.report-table .th-player,
+.report-table .inactive-name {
+    text-align: left;
+    padding-left: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.report-table .th-tag,
+.report-table .inactive-tag {
+    text-align: center;
+    font-family: monospace;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+}
+
+.report-table .th-gain,
+.report-table .inactive-gain {
+    text-align: right;
+    padding-right: 18px;
+    font-family: monospace;
+    font-size: 0.84rem;
+}
+
+.report-stat-box p.gain-good,
+.gain-good {
+    color: var(--accent-green);
+    font-weight: 800;
+}
+
+.report-stat-box p.gain-risk,
+.gain-risk {
+    color: var(--accent-red);
+    font-weight: 800;
+}
+
+.gain-neutral {
+    color: var(--text-muted);
+    font-weight: 800;
+}
+
+@media (max-width: 768px) {
+    .report-modal-container {
+        width: 95%;
+        max-width: 95%;
+        padding: 12px 10px;
+        margin: 6px auto;
+    }
+
+    .report-controls {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .select-report-type,
+    .select-report-date,
+    #btn-generate-report,
+    #btn-download-pdf {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .report-preview {
+        padding: 4px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    .report-print-area {
+        padding: 16px 12px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .report-title { font-size: 1.1rem; }
+    .report-subtitle { font-size: 0.72rem; }
+
+    .report-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .report-stat-box { padding: 6px 4px; }
+    .report-stat-box h3 { font-size: 0.6rem; }
+    .report-stat-box p { font-size: 0.85rem; }
+
+    .report-section-title {
+        font-size: 0.82rem;
+        margin-top: 12px;
+    }
+
+    .report-mvp-table td { padding: 6px 12px; }
+    .report-mvp-table .mvp-name { padding-left: 12px; font-size: 0.8rem; }
+    .report-mvp-table .mvp-gain { padding-right: 12px; font-size: 0.8rem; }
+
+    .report-table { font-size: 0.75rem; }
+    .report-table th,
+    .report-table td { padding: 6px 10px; }
+
+    .report-table .th-player,
+    .report-table .inactive-name { padding-left: 12px; }
+
+    .report-table .th-gain,
+    .report-table .inactive-gain { padding-right: 12px; }
+}
