@@ -17,7 +17,7 @@
       "url": "https://the-eminence.pages.dev/"
     }
     </script>
-    
+
     <meta property="og:site_name" content="The Eminence">
     <meta name="application-name" content="The Eminence">
     <meta property="og:title" content="The Eminence | Brawl Stars Clan Tracker">
@@ -26,23 +26,26 @@
     <meta property="og:image:type" content="image/png">
     <meta property="og:url" content="https://the-eminence.pages.dev/">
     <meta property="og:type" content="website">
-    
+
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="The Eminence | Brawl Stars Clan Tracker">
     <meta name="twitter:description" content="Tracker y estadísticas en vivo del clan The Eminence en Brawl Stars. Revisa el progreso, copas, miembros y podio de nuestro clan.">
     <meta name="twitter:image" content="https://the-eminence.pages.dev/styles/Icons/Logo.png">
 
+    <link rel="stylesheet" href="styles/variables.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/reset.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/navbar.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/cards.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/modals.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/podium.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/report.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/utilities.css?v=2.1.0">
+    <link rel="stylesheet" href="styles/animations.css?v=2.1.0">
 
-    <link rel="stylesheet" href="styles/variables.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/reset.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/layout.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/utilities.css?v=2.0.43">
-    <link rel="stylesheet" href="styles/animations.css?v=2.0.43">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
+
     <link rel="icon" href="favicon.ico" sizes="any">
-    <link rel="icon" href="styles/Icons/Logo.png" type="image/png">
+    <link rel="icon" href="styles/Icons/Logo.webp" type="image/webp">
 </head>
 <body>
     <header class="app-navbar">
@@ -64,23 +67,22 @@
         <section id="state-error" class="glass-panel error-card hidden">
             <h2 class="error-title">Error al cargar clan</h2>
             <p id="error-message" class="text-secondary"></p>
-            <button class="retry-btn" onclick="location.reload()">Reintentar</button>
+            <button type="button" id="btn-retry-clan" class="retry-btn">Reintentar</button>
         </section>
 
         <section id="state-content" class="hidden">
             <div class="glass-panel clan-header-card">
-                
                 <div class="scene">
                     <div class="orbit-system" id="orbit-system-container">
                         <div class="profile-wrapper">
                             <div class="profile">
-                                <img src="styles/Icons/Logo_Clean.png" alt="TE">
+                                <img src="styles/Icons/Logo_Clean.webp" alt="TE" width="100" height="100" decoding="async">
                             </div>
                             <div class="glow-effect"></div>
                         </div>
                     </div>
                 </div>
-                
+
                 <h1 id="clan-name" class="clan-main-title text-shimmer">The Eminence</h1>
                 <div id="clan-tag" class="clan-tag-badge">#80L9UYGQG</div>
                 <p id="clan-desc" class="clan-description-text"></p>
@@ -88,28 +90,28 @@
 
             <div class="grid-stats">
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Copas Totales" class="stat-icon-asset"></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Copas Totales" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                     <div>
                         <div class="stat-label">Copas Totales</div>
                         <div id="total-trophies" class="stat-value text-gold">0</div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-blue"><img src="styles/Icons/members.webp" alt="Miembros" class="stat-icon-asset"></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-blue"><img src="styles/Icons/members.webp" alt="Miembros" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                     <div>
                         <div class="stat-label">Miembros</div>
                         <div id="member-count" class="stat-value text-neon">0 / 30</div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-gold"><img src="styles/Icons/President.png" alt="Presidente" class="stat-icon-asset"></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-gold"><img src="styles/Icons/President.webp" alt="Presidente" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                     <div>
                         <div class="stat-label">Presidente</div>
                         <div id="president-name" class="stat-value"></div>
                     </div>
                 </div>
                 <div class="glass-panel stat-card">
-                    <div class="stat-icon stat-icon-theme stat-icon-neon"><img src="styles/Icons/Requeriments.png" alt="Copas Requeridas" class="stat-icon-asset"></div>
+                    <div class="stat-icon stat-icon-theme stat-icon-neon"><img src="styles/Icons/Requeriments.webp" alt="Copas Requeridas" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                     <div>
                         <div class="stat-label">Copas Requeridas</div>
                         <div id="required-trophies" class="stat-value text-purple">0</div>
@@ -117,13 +119,13 @@
                 </div>
             </div>
 
-                        <div class="glass-panel chart-container chart-container-margin">
+            <div class="glass-panel chart-container chart-container-margin">
                 <div class="chart-header-flex">
                     <h3 class="section-title text-green margin-0">PROGRESO DEL CLAN</h3>
                     <div class="chart-filters" id="clan-chart-filters">
-                        <button data-days="7" class="badge badge-senior active cursor-pointer">7D</button>
-                        <button data-days="30" class="badge badge-senior cursor-pointer">Mes</button>
-                        <button data-days="9999" class="badge badge-senior cursor-pointer">Todo</button>
+                        <button type="button" data-days="7" class="badge badge-senior active cursor-pointer">7D</button>
+                        <button type="button" data-days="30" class="badge badge-senior cursor-pointer">Mes</button>
+                        <button type="button" data-days="9999" class="badge badge-senior cursor-pointer">Todo</button>
                     </div>
                 </div>
                 <div class="chart-container-sm">
@@ -132,14 +134,14 @@
             </div>
 
             <div class="members-controls">
-                <input type="text" id="search-input" class="search-bar" placeholder="Buscar miembro por nombre o tag...">
-                <select id="sort-select" class="sort-select">
+                <input type="text" id="search-input" class="search-bar" placeholder="Buscar miembro por nombre o tag..." aria-label="Buscar miembro por nombre o tag">
+                <select id="sort-select" class="sort-select" aria-label="Ordenar miembros">
                     <option value="trophies-desc">Mayor a menor copas</option>
                     <option value="trophies-asc">Menor a mayor copas</option>
                     <option value="name-asc">Nombre (A-Z)</option>
                 </select>
-                <button id="export-btn" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</button>
-                <button id="btn-report" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Informes</button>
+                <button type="button" id="export-btn" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Exportar CSV</button>
+                <button type="button" id="btn-report" class="retry-btn btn-export"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Informes</button>
             </div>
 
             <div id="members-list" class="grid-members"></div>
@@ -162,7 +164,7 @@
             <div class="member-rank"></div>
             <div class="member-info">
                 <div class="member-header">
-                    <div class="member-name-container"><img class="member-avatar" alt="Icon" loading="lazy" decoding="async" src="" /><span class="member-name"></span></div>
+                    <div class="member-name-container"><img class="member-avatar" alt="Icon" width="42" height="42" loading="lazy" decoding="async" src="" /><span class="member-name"></span></div>
                     <span class="badge member-role-badge"></span>
                 </div>
                 <div class="member-details">
@@ -173,10 +175,10 @@
         </div>
     </template>
 
-    <div id="player-modal" class="modal-overlay hidden">
+    <div id="player-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="player-name">
         <div class="modal-content glass-panel">
-            <button id="close-modal" class="modal-close">&times;</button>
-            
+            <button type="button" id="close-modal" class="modal-close" aria-label="Cerrar modal">&times;</button>
+
             <div id="modal-loading" class="loader-container">
                 <div class="spinner"></div>
                 <p class="text-secondary">Cargando perfil del jugador...</p>
@@ -189,14 +191,14 @@
 
             <div id="modal-body" class="hidden">
                 <div class="player-hero">
-                    <img id="player-modal-icon" src="" alt="Icon" class="player-modal-profile-icon hidden">
+                    <img id="player-modal-icon" src="" alt="Icon" width="88" height="88" loading="lazy" decoding="async" class="player-modal-profile-icon hidden">
                     <div class="player-hero-info">
                         <div class="flex items-center gap-3">
                             <h2 id="player-name" class="player-name text-neon margin-0"></h2>
                         </div>
                         <div class="player-meta-row">
                             <span id="player-tag" class="player-tag-badge"></span>
-                            <button id="capture-btn" class="btn-share-compact hidden"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span class="btn-share-text">Tarjeta Gráfica</span></button>
+                            <button type="button" id="capture-btn" class="btn-share-compact hidden"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> <span class="btn-share-text">Tarjeta Gráfica</span></button>
                         </div>
                     </div>
                 </div>
@@ -204,119 +206,119 @@
                 <h3 class="section-title text-green">PLAYER STATS</h3>
                 <div class="player-stats-grid">
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Copas Actuales" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Copas Actuales" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-trophies"></div>
                             <div class="stat-label">Copas Actuales</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Récord Copas" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Récord Copas" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-highest-trophies"></div>
                             <div class="stat-label">Récord Copas</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_prestige_trophy.png" alt="Copas de Prestigio" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_prestige_trophy.webp" alt="Copas de Prestigio" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-cosmic" id="player-prestige-trophies">0</div>
                             <div class="stat-label">Copas de Prestigio</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_total_prestige.png" alt="Total de Prestigios" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_total_prestige.webp" alt="Total de Prestigios" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-cosmic" id="player-total-prestige">0</div>
                             <div class="stat-label">Total de Prestigios</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-purple"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_1.png" alt="Prestigio 1" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-purple"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_1.webp" alt="Prestigio 1" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-purple" id="player-prestige-1">0</div>
                             <div class="stat-label">Prestigio 1</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_2.png" alt="Prestigio 2" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_2.webp" alt="Prestigio 2" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-red" id="player-prestige-2">0</div>
                             <div class="stat-label">Prestigio 2</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_3.png" alt="Prestigio 3" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_3.webp" alt="Prestigio 3" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-prestige-3">0</div>
                             <div class="stat-label">Prestigio 3</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-purple"><img id="player-ranked-icon" src="styles/Icons/ranked/Bronze.png" alt="Ranked" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-purple"><img id="player-ranked-icon" src="styles/Icons/ranked/Bronze.png" alt="Ranked" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-purple" id="player-ranked">N/A</div>
                             <div class="stat-label" id="player-ranked-label">Ranked Actual</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><img id="player-ranked-highest-icon" src="styles/Icons/ranked/Bronze.png" alt="Récord Ranked" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img id="player-ranked-highest-icon" src="styles/Icons/ranked/Bronze.png" alt="Récord Ranked" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-ranked-highest">N/A</div>
                             <div class="stat-label" id="player-ranked-highest-label">Récord Ranked</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><img id="player-fame-icon" src="styles/Icons/fame/global.png" alt="Fama" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img id="player-fame-icon" src="styles/Icons/fame/global.png" alt="Fama" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-fame">Sin Fama</div>
                             <div class="stat-label" id="player-fame-label">Fama Mundial</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/exp-level.png" alt="Nivel de XP" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/exp-level.webp" alt="Nivel de XP" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-neon" id="player-level"></div>
                             <div class="stat-label">Nivel de XP</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/xp_points.webp" alt="Puntos XP" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/xp_points.webp" alt="Puntos XP" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-neon" id="player-xp-points"></div>
                             <div class="stat-label">Puntos XP</div>
                         </div>
                     </div>
-                    <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/clock.gif" alt="Horas Jugadas" class="stat-icon-asset"></div>
+                    <div class="stat-card minimal" title="Estimación basada en victorias totales (~2.5 min/partida, 50% de victorias)">
+                        <div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/clock.gif" alt="Horas Estimadas" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-neon" id="player-hours"></div>
-                            <div class="stat-label">Horas Jugadas</div>
+                            <div class="stat-label">Horas Estimadas</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/Total_win.webp" alt="Victorias Totales" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/Total_win.webp" alt="Victorias Totales" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-gold" id="player-total-wins"></div>
                             <div class="stat-label">Victorias Totales</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/3v3.webp" alt="Victorias 3v3" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/3v3.webp" alt="Victorias 3v3" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-red" id="player-3v3-wins"></div>
                             <div class="stat-label">Victorias 3v3</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-green"><img src="styles/Icons/solo.png" alt="Victorias Solo" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-green"><img src="styles/Icons/solo.png" alt="Victorias Solo" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-green" id="player-solo-wins"></div>
                             <div class="stat-label">Victorias Solo</div>
                         </div>
                     </div>
                     <div class="stat-card minimal">
-                        <div class="stat-icon-svg stat-icon-blue"><img src="styles/Icons/duo.png" alt="Victorias Dúo" class="stat-icon-asset"></div>
+                        <div class="stat-icon-svg stat-icon-blue"><img src="styles/Icons/duo.png" alt="Victorias Dúo" class="stat-icon-asset" width="34" height="34" decoding="async"></div>
                         <div>
                             <div class="stat-value text-blue" id="player-duo-wins"></div>
                             <div class="stat-label">Victorias Dúo</div>
@@ -324,12 +326,12 @@
                     </div>
                 </div>
 
-                                <h3 class="section-title text-green chart-header-flex">
+                <h3 class="section-title text-green chart-header-flex">
                     HISTORIAL DE COPAS
                     <div class="chart-filters" id="player-chart-filters">
-                        <button data-days="7" class="badge badge-president active cursor-pointer">7D</button>
-                        <button data-days="30" class="badge badge-president cursor-pointer">Mes</button>
-                        <button data-days="9999" class="badge badge-president cursor-pointer">Todo</button>
+                        <button type="button" data-days="7" class="badge badge-president active cursor-pointer">7D</button>
+                        <button type="button" data-days="30" class="badge badge-president cursor-pointer">Mes</button>
+                        <button type="button" data-days="9999" class="badge badge-president cursor-pointer">Todo</button>
                     </div>
                 </h3>
                 <div class="glass-panel player-chart-container">
@@ -337,31 +339,32 @@
                         <canvas id="player-chart"></canvas>
                     </div>
                 </div>
-<h3 class="section-title text-green">PROGRESSION</h3>
+
+                <h3 class="section-title text-green">PROGRESSION</h3>
                 <div class="progression-container glass-panel">
                     <div class="progression-stats">
                         <div class="prog-stat">
-                            <img src="styles/Icons/unlocked.webp" alt="Brawlers" class="stat-icon-asset prog-icon">
+                            <img src="styles/Icons/unlocked.webp" alt="Brawlers" class="stat-icon-asset prog-icon" width="32" height="32" loading="lazy" decoding="async">
                             <span class="prog-value text-neon" id="prog-brawlers"></span>
                             <span class="prog-label">Brawlers Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="styles/Icons/star_power.webp" alt="Starpowers" class="stat-icon-asset prog-icon">
+                            <img src="styles/Icons/star_power.webp" alt="Starpowers" class="stat-icon-asset prog-icon" width="32" height="32" loading="lazy" decoding="async">
                             <span class="prog-value text-gold" id="prog-starpowers"></span>
                             <span class="prog-label">Estelares Desbloqueadas</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="styles/Icons/gadget.webp" alt="Gadgets" class="stat-icon-asset prog-icon">
+                            <img src="styles/Icons/gadget.webp" alt="Gadgets" class="stat-icon-asset prog-icon" width="32" height="32" loading="lazy" decoding="async">
                             <span class="prog-value text-green" id="prog-gadgets"></span>
                             <span class="prog-label">Gadgets Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="styles/Icons/gear.webp" alt="Gears" class="stat-icon-asset prog-icon">
+                            <img src="styles/Icons/gear.webp" alt="Gears" class="stat-icon-asset prog-icon" width="32" height="32" loading="lazy" decoding="async">
                             <span class="prog-value text-purple" id="prog-gears"></span>
                             <span class="prog-label">Gears Desbloqueados</span>
                         </div>
                         <div class="prog-stat">
-                            <img src="styles/Icons/hypercharge_empty.png" alt="Hipercargas" class="stat-icon-asset prog-icon">
+                            <img src="styles/Icons/hypercharge_empty.png" alt="Hipercargas" class="stat-icon-asset prog-icon" width="32" height="32" loading="lazy" decoding="async">
                             <span class="prog-value text-purple" id="prog-hypercharges">0</span>
                             <span class="prog-label">Hipercargas Desbloqueadas</span>
                         </div>
@@ -376,58 +379,62 @@
 
     <template id="brawler-template">
         <div class="brawler-card">
-            <img class="brawler-avatar" src="" alt="Brawler" loading="lazy" decoding="async">
+            <img class="brawler-avatar" src="" alt="Brawler" width="40" height="40" loading="lazy" decoding="async">
             <div class="brawler-info">
                 <div class="brawler-header">
-                <span class="brawler-name"></span>
-                <span class="badge brawler-power"></span>
-            </div>
-            <div class="brawler-stats">
-                <span>🏆 <span class="brawler-trophies text-gold"></span></span>
-                <span class="text-muted text-small">Récord: <span class="brawler-highest"></span></span>
-            </div>
+                    <span class="brawler-name"></span>
+                    <span class="badge brawler-power"></span>
+                </div>
+                <div class="brawler-stats">
+                    <span>🏆 <span class="brawler-trophies text-gold"></span></span>
+                    <span class="text-muted text-small">Récord: <span class="brawler-highest"></span></span>
+                </div>
             </div>
         </div>
     </template>
 
-    <script type="module" src="app/app.js?v=2.0.43"></script>
+    <button type="button" id="btn-switch-clan" class="floating-clan-btn">
+        <span class="btn-text"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-mr-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <span class="switch-clan-full">Ir al Clan 2</span></span>
+        <span class="btn-short-text"><span class="switch-clan-short">Clan 2</span> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-ml-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+    </button>
 
-    <a href="./modules/Clan-2/index.html" class="floating-clan-btn"><span class="btn-text"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-mr-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Ir al Clan 2</span><span class="btn-short-text">Clan 2 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-ml-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span></a>
-    
-    <div id="btn-podium" class="floating-podium-btn"><span class="btn-text">👑 Podio & Fantasmas</span><span class="btn-short-text">👑 Podio</span></div>
+    <button type="button" id="btn-podium" class="floating-podium-btn">
+        <span class="btn-text">👑 Podio & Fantasmas</span>
+        <span class="btn-short-text">👑 Podio</span>
+    </button>
 
-    <div id="podium-modal" class="modal-overlay hidden">
+    <div id="podium-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="podium-modal-heading">
         <div class="modal-content glass-panel podium-modal-content">
-            <button id="close-podium" class="modal-close">&times;</button>
+            <button type="button" id="close-podium" class="modal-close" aria-label="Cerrar modal">&times;</button>
             <div class="podium-header-banner">
                 <div class="podium-title-container">
-                    <h2 class="section-title text-gold margin-0">
-                        <img src="styles/Icons/Record_Trophy.png" class="podium-header-icon" alt="">
+                    <h2 id="podium-modal-heading" class="section-title text-gold margin-0">
+                        <img src="styles/Icons/Record_Trophy.webp" class="podium-header-icon" alt="" width="28" height="28" loading="lazy" decoding="async">
                         RENDIMIENTO SEMANAL
                     </h2>
                 </div>
                 <div class="podium-controls-group">
                     <div class="podium-tabs podium-period-tabs" id="podium-period-tabs">
-                        <button class="badge active" data-period="previous">
-                            <img src="styles/Icons/trophy.png" class="podium-tab-icon" alt="">
+                        <button type="button" class="badge active" data-period="previous">
+                            <img src="styles/Icons/trophy.png" class="podium-tab-icon" alt="" width="20" height="20" loading="lazy" decoding="async">
                             <span>Semana Pasada</span>
                         </button>
-                        <button class="badge" data-period="current">
-                            <img src="styles/Icons/fame/solar.png" class="podium-tab-icon" alt="">
+                        <button type="button" class="badge" data-period="current">
+                            <img src="styles/Icons/fame/solar.png" class="podium-tab-icon" alt="" width="20" height="20" loading="lazy" decoding="async">
                             <span>Semana Actual</span>
                         </button>
                     </div>
                     <div class="podium-tabs podium-scope-tabs" id="podium-tabs">
-                        <button class="badge active" data-scope="general">
-                            <img src="styles/Icons/President.png" class="podium-tab-icon" alt="">
+                        <button type="button" class="badge active" data-scope="general">
+                            <img src="styles/Icons/President.webp" class="podium-tab-icon" alt="" width="20" height="20" loading="lazy" decoding="async">
                             <span>Todos</span>
                         </button>
-                        <button class="badge" data-scope="clan1">
-                            <img src="styles/Icons/members.webp" class="podium-tab-icon" alt="">
+                        <button type="button" class="badge" data-scope="clan1">
+                            <img src="styles/Icons/members.webp" class="podium-tab-icon" alt="" width="20" height="20" loading="lazy" decoding="async">
                             <span>Clan 1</span>
                         </button>
-                        <button class="badge" data-scope="clan2">
-                            <img src="styles/Icons/3v3.webp" class="podium-tab-icon" alt="">
+                        <button type="button" class="badge" data-scope="clan2">
+                            <img src="styles/Icons/3v3.webp" class="podium-tab-icon" alt="" width="20" height="20" loading="lazy" decoding="async">
                             <span>Clan 2</span>
                         </button>
                     </div>
@@ -451,35 +458,36 @@
         </div>
     </div>
 
-    <div id="report-modal" class="modal-overlay hidden">
+    <div id="report-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="report-modal-heading">
         <div class="modal-content glass-panel report-modal-container">
-            <button id="close-report" class="modal-close">&times;</button>
+            <button type="button" id="close-report" class="modal-close" aria-label="Cerrar modal">&times;</button>
             <div class="podium-header-banner">
                 <div>
-                    <h2 class="section-title text-purple margin-0">📋 INFORME DEL CLAN</h2>
+                    <h2 id="report-modal-heading" class="section-title text-purple margin-0">📋 INFORME DEL CLAN</h2>
                 </div>
             </div>
-            
+
             <div class="report-controls">
-                <select id="report-type-select" class="sort-select select-report-type">
+                <select id="report-type-select" class="sort-select select-report-type" aria-label="Tipo de informe">
                     <option value="weekly">Semanal</option>
                     <option value="monthly">Mensual</option>
                     <option value="global">Global (Histórico)</option>
                 </select>
-                <select id="report-date-select" class="sort-select select-report-date">
+                <select id="report-date-select" class="sort-select select-report-date" aria-label="Período del informe">
                     <option value="">Cargando fechas...</option>
                 </select>
-                <button id="btn-generate-report" class="retry-btn">Generar</button>
-                <button id="btn-download-pdf" class="retry-btn btn-export btn-pdf hidden">Descargar PDF</button>
+                <button type="button" id="btn-generate-report" class="retry-btn">Generar</button>
+                <button type="button" id="btn-download-pdf" class="retry-btn btn-export btn-pdf hidden">Descargar PDF</button>
             </div>
 
+            <div id="report-error" class="report-inline-error hidden" role="alert"></div>
             <div id="report-loading" class="podium-loading-state hidden">Generando informe...</div>
-            
+
             <div id="report-preview-container" class="report-preview hidden">
                 <div id="report-content-print" class="report-print-area">
-                    <h1 class="report-title">Auditoría del Clan: The Eminence</h1>
+                    <h1 id="report-title-clan" class="report-title">Auditoría del Clan: The Eminence</h1>
                     <p class="report-subtitle" id="report-subtitle-print">Cargando...</p>
-                    
+
                     <div class="report-stats-grid">
                         <div class="report-stat-box box-net">
                             <h3>Balance Neto</h3>
@@ -524,7 +532,7 @@
             </div>
         </div>
     </div>
-    
+
     <template id="report-mvp-template">
         <tr>
             <td class="mvp-name"></td>
@@ -581,11 +589,11 @@
             <div class="confetti-container" id="confetti-container"></div>
             <div class="winner-announcement-content glass-panel all-winners-card">
                 <h2 class="text-gold margin-0 winners-title">🏆 GANADORES DE LA SEMANA PASADA 🏆</h2>
-                
+
                 <div class="winners-list flex-col gap-4">
-                                        <div class="winner-row winner-gold">
+                    <div class="winner-row winner-gold">
                         <div class="flex items-center gap-2">
-                            <img class="w-gen-avatar winner-avatar" src="" alt="Avatar">
+                            <img class="w-gen-avatar winner-avatar" src="" alt="Avatar" width="64" height="64" loading="lazy" decoding="async">
                             <div class="flex-col text-left">
                                 <span class="winner-label text-gold">GLOBAL</span>
                                 <span class="w-gen-name text-neon winner-name"></span>
@@ -594,9 +602,9 @@
                         <span class="w-gen-gain text-green font-bold"></span>
                     </div>
 
-                                        <div class="winner-row winner-silver">
+                    <div class="winner-row winner-silver">
                         <div class="flex items-center gap-2">
-                            <img class="w-c1-avatar winner-avatar-sm" src="" alt="Avatar">
+                            <img class="w-c1-avatar winner-avatar-sm" src="" alt="Avatar" width="54" height="54" loading="lazy" decoding="async">
                             <div class="flex-col text-left">
                                 <span class="winner-label text-secondary">CLAN 1</span>
                                 <span class="w-c1-name text-neon winner-name"></span>
@@ -605,9 +613,9 @@
                         <span class="w-c1-gain text-green font-bold"></span>
                     </div>
 
-                                        <div class="winner-row winner-silver">
+                    <div class="winner-row winner-silver">
                         <div class="flex items-center gap-2">
-                            <img class="w-c2-avatar winner-avatar-sm" src="" alt="Avatar">
+                            <img class="w-c2-avatar winner-avatar-sm" src="" alt="Avatar" width="54" height="54" loading="lazy" decoding="async">
                             <div class="flex-col text-left">
                                 <span class="winner-label text-secondary">CLAN 2</span>
                                 <span class="w-c2-name text-neon winner-name"></span>
@@ -616,7 +624,7 @@
                         <span class="w-c2-gain text-green font-bold"></span>
                     </div>
                 </div>
-                <button class="retry-btn mt-10 close-announcement-btn w-full">Ver Podio</button>
+                <button type="button" class="retry-btn mt-10 close-announcement-btn w-full">Ver Podio</button>
             </div>
         </div>
     </template>
@@ -630,38 +638,40 @@
                 </div>
             </div>
             <div class="sc-grid">
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Copas Actuales" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-trophies">0</div><div class="sc-lbl">Copas Actuales</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Récord Copas" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-highest">0</div><div class="sc-lbl">Récord Copas</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_prestige_trophy.png" alt="Copas Prestigio" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-prestige-trophies">0</div><div class="sc-lbl">Copas Prestigio</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_total_prestige.png" alt="Total Prestigios" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-total-prestige">0</div><div class="sc-lbl">Total Prestigios</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-purple"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_1.png" alt="Prestigio 1" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-prestige-1">0</div><div class="sc-lbl">Prestigio 1</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_2.png" alt="Prestigio 2" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-prestige-2">0</div><div class="sc-lbl">Prestigio 2</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_3.png" alt="Prestigio 3" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-prestige-3">0</div><div class="sc-lbl">Prestigio 3</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-purple"><img id="sc-ranked-icon" src="styles/Icons/ranked/Bronze.png" alt="Ranked" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-ranked">N/A</div><div class="sc-lbl" id="sc-ranked-label">Ranked Actual</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img id="sc-ranked-highest-icon" src="styles/Icons/ranked/Bronze.png" alt="Récord Ranked" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-ranked-highest">N/A</div><div class="sc-lbl" id="sc-ranked-highest-label">Récord Ranked</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img id="sc-fame-icon" src="styles/Icons/fame/global.png" alt="Fama" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-fame">Sin Fama</div><div class="sc-lbl" id="sc-fame-label">Fama Mundial</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/exp-level.png" alt="Nivel de XP" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-level">0</div><div class="sc-lbl">Nivel de XP</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/xp_points.webp" alt="Puntos XP" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-xp">0</div><div class="sc-lbl">Puntos XP</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/clock.gif" alt="Horas Jugadas" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-hours">0</div><div class="sc-lbl">Horas Jugadas</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/Total_win.webp" alt="Victorias Totales" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-total-wins">0</div><div class="sc-lbl">Victorias Totales</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/3v3.webp" alt="Victorias 3v3" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-3v3">0</div><div class="sc-lbl">Victorias 3v3</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-green"><img src="styles/Icons/solo.png" alt="Victorias Solo" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-solo">0</div><div class="sc-lbl">Victorias Solo</div></div></div>
-                <div class="sc-stat"><div class="stat-icon-svg stat-icon-blue"><img src="styles/Icons/duo.png" alt="Victorias Dúo" class="stat-icon-asset"></div><div><div class="sc-val" id="sc-duo">0</div><div class="sc-lbl">Victorias Dúo</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Copas Actuales" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-trophies">0</div><div class="sc-lbl">Copas Actuales</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/trophy.png" alt="Récord Copas" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-highest">0</div><div class="sc-lbl">Récord Copas</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_prestige_trophy.webp" alt="Copas Prestigio" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-prestige-trophies">0</div><div class="sc-lbl">Copas Prestigio</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-cosmic"><img src="styles/Icons/prestige/icon_total_prestige.webp" alt="Total Prestigios" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-total-prestige">0</div><div class="sc-lbl">Total Prestigios</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-purple"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_1.webp" alt="Prestigio 1" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-prestige-1">0</div><div class="sc-lbl">Prestigio 1</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_2.webp" alt="Prestigio 2" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-prestige-2">0</div><div class="sc-lbl">Prestigio 2</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/prestige/icon_trophy_brawler_prestige_3.webp" alt="Prestigio 3" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-prestige-3">0</div><div class="sc-lbl">Prestigio 3</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-purple"><img id="sc-ranked-icon" src="styles/Icons/ranked/Bronze.png" alt="Ranked" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-ranked">N/A</div><div class="sc-lbl" id="sc-ranked-label">Ranked Actual</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img id="sc-ranked-highest-icon" src="styles/Icons/ranked/Bronze.png" alt="Récord Ranked" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-ranked-highest">N/A</div><div class="sc-lbl" id="sc-ranked-highest-label">Récord Ranked</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img id="sc-fame-icon" src="styles/Icons/fame/global.png" alt="Fama" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-fame">Sin Fama</div><div class="sc-lbl" id="sc-fame-label">Fama Mundial</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/exp-level.webp" alt="Nivel de XP" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-level">0</div><div class="sc-lbl">Nivel de XP</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/xp_points.webp" alt="Puntos XP" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-xp">0</div><div class="sc-lbl">Puntos XP</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-neon"><img src="styles/Icons/clock.gif" alt="Horas Estimadas" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-hours">0</div><div class="sc-lbl">Horas Estimadas</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-gold"><img src="styles/Icons/Total_win.webp" alt="Victorias Totales" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-total-wins">0</div><div class="sc-lbl">Victorias Totales</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-red"><img src="styles/Icons/3v3.webp" alt="Victorias 3v3" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-3v3">0</div><div class="sc-lbl">Victorias 3v3</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-green"><img src="styles/Icons/solo.png" alt="Victorias Solo" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-solo">0</div><div class="sc-lbl">Victorias Solo</div></div></div>
+                <div class="sc-stat"><div class="stat-icon-svg stat-icon-blue"><img src="styles/Icons/duo.png" alt="Victorias Dúo" class="stat-icon-asset" width="34" height="34" decoding="async"></div><div><div class="sc-val" id="sc-duo">0</div><div class="sc-lbl">Victorias Dúo</div></div></div>
             </div>
             <div class="sc-footer">THE EMINENCE STATS</div>
         </div>
     </div>
+
     <template id="orbit-satellite-template">
         <div class="satellite-wrapper">
             <div class="satellite">
                 <div class="satellite-inner">
                     <div class="blob"></div>
-                    <img src="" alt="">
+                    <img src="" alt="" width="30" height="30" decoding="async">
                     <span class="sr-only"></span>
                 </div>
             </div>
         </div>
     </template>
+
+    <script type="module" src="app/app.js?v=2.1.0"></script>
 </body>
 </html>
-
