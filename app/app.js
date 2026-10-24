@@ -1,19 +1,55 @@
-import { ClanService } from '../modules/core/services/clan.service.js';
-import { HistoryService } from '../modules/core/services/history.service.js?v=2.0.43';
-import { ChartManager } from '../modules/shared/utils/chart.js';
-import { formatNumber, formatRole, getRoleBadgeClass, getProfileIconUrl, getBrawlerIconUrl, getRankedIconUrl, getFameIconUrl, initDynamicYear } from '../modules/shared/utils/formatters.js';
-import { ReportManager } from '../modules/shared/utils/report.js';
+import { APP_CONFIG, resolveClanKey } from './app.config.js?v=2.1.0';
+import { ClanService } from '../modules/core/services/clan.service.js?v=2.1.0';
+import { PlayerService } from '../modules/core/services/player.service.js?v=2.1.0';
+import { HistoryService } from '../modules/core/services/history.service.js?v=2.1.0';
+import { ChartManager } from '../modules/shared/utils/chart.js?v=2.1.0';
+import {
+    escapeCsvCell,
+    formatNumber,
+    formatRole,
+    getBrawlerIconUrl,
+    getFameIconUrl,
+    getLocalDateString,
+    getProfileIconUrl,
+    getRankedIconUrl,
+    getRoleBadgeClass,
+    initDynamicYear,
+    parseUtcDate
+} from '../modules/shared/utils/formatters.js?v=2.1.0';
+import { ReportManager } from '../modules/shared/utils/report.js?v=2.1.0';
+import { ensureHtml2Canvas } from '../modules/shared/utils/script-loader.js?v=2.1.0';
 
-class App {
-    constructor() {
+function attachButtonBehavior(el, handler) {
+    if (!el) return;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.addEventListener('click', handler);
+    el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handler(e);
+        }
+    });
+}
+
+export class ClanTrackerApp {
+    constructor({ clanKey = null } = {}) {
+        this.activeClanKey = clanKey || resolveClanKey(window.location.search, window.location.hash);
         this.clanData = null;
         this.hasShownWinners = false;
+        this.podiumCache = {};
+        this.activePlayerRequestId = 0;
+        this.playerAbortController = null;
+        this.clanChartAbortController = null;
+        this.playerChartAbortController = null;
+        this.searchDebounceTimer = null;
+
         this.dom = {
             loading: document.getElementById('state-loading'),
             content: document.getElementById('state-content'),
             error: document.getElementById('state-error'),
             errorMessage: document.getElementById('error-message'),
-            
+
             clanName: document.getElementById('clan-name'),
             clanTag: document.getElementById('clan-tag'),
             clanDesc: document.getElementById('clan-desc'),
@@ -21,51 +57,180 @@ class App {
             memberCount: document.getElementById('member-count'),
             requiredTrophies: document.getElementById('required-trophies'),
             presidentName: document.getElementById('president-name'),
-            
+
             membersList: document.getElementById('members-list'),
             searchInput: document.getElementById('search-input'),
             sortSelect: document.getElementById('sort-select'),
-            
+            switchClanBtn: document.getElementById('btn-switch-clan'),
+
             memberTemplate: document.getElementById('member-template')
         };
 
-        this.reportManager = new ReportManager(() => this.clanData, '80L9UYGQG');
+        const activeClan = this.getActiveClanConfig();
+        this.reportManager = new ReportManager(() => this.clanData, activeClan.tag, activeClan.name);
         this.init();
     }
 
-    async init() {
+    getActiveClanConfig() {
+        return APP_CONFIG.CLANS[this.activeClanKey] || APP_CONFIG.CLANS.clan1;
+    }
+
+    getOtherClanConfig() {
+        return this.activeClanKey === 'clan1' ? APP_CONFIG.CLANS.clan2 : APP_CONFIG.CLANS.clan1;
+    }
+
+    init() {
         initDynamicYear();
         const localDay = new Date().getDay();
         this.currentPodiumPeriod = (localDay === 4 || localDay === 5) ? 'previous' : 'current';
-        this.podiumCache = {};
+
+        this.updateClanMetadataUI();
         this.setupEvents();
         this.setupPodium();
+        this.setupModalsAccessibility();
+        this.loadClan();
+    }
+
+    updateClanMetadataUI() {
+        const clan = this.getActiveClanConfig();
+        const other = this.getOtherClanConfig();
+
+        document.title = `${clan.name} | Brawl Stars Clan`;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', clan.description);
+
+        if (this.dom.switchClanBtn) {
+            const fullText = this.dom.switchClanBtn.querySelector('.switch-clan-full');
+            const shortText = this.dom.switchClanBtn.querySelector('.switch-clan-short');
+            if (fullText) fullText.textContent = `Ir al ${other.shortLabel}`;
+            if (shortText) shortText.textContent = other.shortLabel;
+            this.dom.switchClanBtn.setAttribute('aria-label', `Cambiar a ${other.name}`);
+        }
+    }
+
+    async switchClan(nextClanKey, { updateHistory = true } = {}) {
+        if (!APP_CONFIG.CLANS[nextClanKey] || nextClanKey === this.activeClanKey) return;
+        this.activeClanKey = nextClanKey;
+
+        const clan = this.getActiveClanConfig();
+        if (updateHistory && window.history && window.history.pushState) {
+            const nextUrl = nextClanKey === 'clan2' ? '?clan=2' : window.location.pathname;
+            window.history.pushState({ clanKey: nextClanKey }, '', nextUrl);
+        }
+
+        this.updateClanMetadataUI();
+        this.reportManager.setClan(clan.tag, clan.name);
+        if (this.dom.searchInput) this.dom.searchInput.value = '';
         await this.loadClan();
-        setTimeout(() => this.loadPodiumData(true), 600);
     }
 
     setupEvents() {
         if (this.dom.searchInput) {
-            this.dom.searchInput.addEventListener('input', () => this.renderMembers());
+            this.dom.searchInput.addEventListener('input', () => {
+                clearTimeout(this.searchDebounceTimer);
+                this.searchDebounceTimer = setTimeout(() => this.renderMembers(), 120);
+            });
         }
+
         if (this.dom.sortSelect) {
-            this.dom.sortSelect.addEventListener('change', () => this.renderMembers());
+            this.dom.sortSelect.addEventListener('change', () => {
+                this.renderMembers();
+            });
         }
+
+        if (this.dom.switchClanBtn) {
+            this.dom.switchClanBtn.addEventListener('click', () => {
+                const other = this.getOtherClanConfig();
+                this.switchClan(other.key);
+            });
+        }
+
+        window.addEventListener('popstate', () => {
+            const key = resolveClanKey(window.location.search, window.location.hash);
+            if (key !== this.activeClanKey) {
+                this.switchClan(key, { updateHistory: false });
+            }
+        });
+
+        const retryBtn = document.getElementById('btn-retry-clan');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => this.loadClan());
+        }
+    }
+
+    setupModalsAccessibility() {
+        const playerModal = document.getElementById('player-modal');
+        const podiumModal = document.getElementById('podium-modal');
+        const reportModal = document.getElementById('report-modal');
+        const closePlayerBtn = document.getElementById('close-modal');
+        const closePodiumBtn = document.getElementById('close-podium');
+
+        const closePlayerModal = () => {
+            if (!playerModal || playerModal.classList.contains('hidden')) return;
+            playerModal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            this.activePlayerRequestId++;
+            if (this.playerAbortController) {
+                this.playerAbortController.abort();
+                this.playerAbortController = null;
+            }
+            if (this.playerChartAbortController) {
+                this.playerChartAbortController.abort();
+                this.playerChartAbortController = null;
+            }
+        };
+
+        const closePodiumModal = () => {
+            if (!podiumModal || podiumModal.classList.contains('hidden')) return;
+            podiumModal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        };
+
+        if (closePlayerBtn) closePlayerBtn.onclick = closePlayerModal;
+        if (playerModal) {
+            playerModal.onclick = (e) => {
+                if (e.target === playerModal) closePlayerModal();
+            };
+        }
+
+        if (closePodiumBtn) closePodiumBtn.onclick = closePodiumModal;
+        if (podiumModal) {
+            podiumModal.onclick = (e) => {
+                if (e.target === podiumModal) closePodiumModal();
+            };
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (playerModal && !playerModal.classList.contains('hidden')) {
+                closePlayerModal();
+                return;
+            }
+            if (podiumModal && !podiumModal.classList.contains('hidden')) {
+                closePodiumModal();
+                return;
+            }
+            if (reportModal && !reportModal.classList.contains('hidden')) {
+                this.reportManager.closeModal();
+            }
+        });
     }
 
     setupPodium() {
         const btn = document.getElementById('btn-podium');
         const modal = document.getElementById('podium-modal');
-        const closeBtn = document.getElementById('close-podium');
         if (!btn || !modal) return;
 
-        btn.onmouseenter = () => {
+        const preload = () => {
             if (!this.podiumMembersData && !this.podiumLoadingPromise) {
                 this.loadPodiumData(true);
             }
         };
 
-        btn.onclick = () => {
+        btn.addEventListener('mouseenter', preload);
+        btn.addEventListener('focus', preload);
+
+        btn.addEventListener('click', () => {
             modal.classList.remove('hidden');
             document.body.classList.add('modal-open');
             if (this.podiumMembersData) {
@@ -81,20 +246,15 @@ class App {
             } else {
                 this.loadPodiumData(false);
             }
-        };
-
-        closeBtn.onclick = () => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('modal-open');
-        };
+        });
 
         const periodTabs = document.querySelectorAll('#podium-period-tabs button');
-        periodTabs.forEach(button => {
+        periodTabs.forEach((button) => {
             button.classList.toggle('active', button.dataset.period === this.currentPodiumPeriod);
             button.onclick = () => {
                 const period = button.dataset.period || 'previous';
                 if (this.currentPodiumPeriod === period) return;
-                periodTabs.forEach(b => b.classList.remove('active'));
+                periodTabs.forEach((b) => b.classList.remove('active'));
                 button.classList.add('active');
                 this.currentPodiumPeriod = period;
                 this.switchPodiumPeriod(period);
@@ -102,9 +262,9 @@ class App {
         });
 
         const tabButtons = document.querySelectorAll('#podium-tabs button');
-        tabButtons.forEach(button => {
+        tabButtons.forEach((button) => {
             button.onclick = () => {
-                tabButtons.forEach(b => b.classList.remove('active'));
+                tabButtons.forEach((b) => b.classList.remove('active'));
                 button.classList.add('active');
                 this.currentPodiumScope = button.dataset.scope || 'general';
                 this.renderPodiumScope();
@@ -116,14 +276,16 @@ class App {
         const historyMap = {};
         let minRecordTime = Date.now();
 
-        (historyList || []).forEach(h => {
+        (historyList || []).forEach((h) => {
             if (h.player_tag) {
                 historyMap[h.player_tag] = h;
                 historyMap[h.player_tag.replace(/^#/, '')] = h;
             }
             if (h.oldest_record) {
-                const t = new Date(h.oldest_record + 'Z').getTime();
-                if (t < minRecordTime) minRecordTime = t;
+                const parsed = parseUtcDate(h.oldest_record);
+                if (parsed && parsed.getTime() < minRecordTime) {
+                    minRecordTime = parsed.getTime();
+                }
             }
         });
 
@@ -141,7 +303,7 @@ class App {
             cycleDay = daysSinceWed === 0 ? 7 : daysSinceWed;
         }
 
-        const members = allMembers.map(m => {
+        const members = allMembers.map((m) => {
             const clean = m.tag.replace(/^#/, '');
             const record = historyMap[m.tag] || historyMap[clean];
             let gain = 0;
@@ -215,7 +377,7 @@ class App {
 
         const loading = document.getElementById('podium-loading');
         const content = document.getElementById('podium-content');
-        
+
         if (!isBackground) {
             if (loading) loading.classList.remove('hidden');
             if (content) content.classList.add('hidden');
@@ -223,37 +385,51 @@ class App {
 
         this.podiumLoadingPromise = (async () => {
             try {
-                const [clan1Data, clan2Data] = await Promise.all([
-                    ClanService.getClanData('80L9UYGQG').catch(() => null),
-                    ClanService.getClanData('2CGG8Y229').catch(() => null)
-                ]);
+                const clan1Cfg = APP_CONFIG.CLANS.clan1;
+                const clan2Cfg = APP_CONFIG.CLANS.clan2;
 
-                const clan1Members = (clan1Data?.members || []).map(m => ({ ...m, clanName: clan1Data?.name || 'The Eminence', clanScope: 'clan1' }));
-                const clan2Members = (clan2Data?.members || []).map(m => ({ ...m, clanName: clan2Data?.name || 'The Eminence 2', clanScope: 'clan2' }));
+                const clan1Promise = (this.activeClanKey === 'clan1' && this.clanData)
+                    ? Promise.resolve(this.clanData)
+                    : ClanService.getClanData(clan1Cfg.tag).catch(() => null);
+                const clan2Promise = (this.activeClanKey === 'clan2' && this.clanData)
+                    ? Promise.resolve(this.clanData)
+                    : ClanService.getClanData(clan2Cfg.tag).catch(() => null);
+
+                const [clan1Data, clan2Data] = await Promise.all([clan1Promise, clan2Promise]);
+
+                const clan1Members = (clan1Data?.members || []).map((m) => ({
+                    ...m,
+                    clanName: clan1Data?.name || clan1Cfg.name,
+                    clanScope: 'clan1'
+                }));
+                const clan2Members = (clan2Data?.members || []).map((m) => ({
+                    ...m,
+                    clanName: clan2Data?.name || clan2Cfg.name,
+                    clanScope: 'clan2'
+                }));
 
                 const allMembers = [...clan1Members, ...clan2Members];
-                const allTags = allMembers.map(m => m.tag);
+                const allTags = allMembers.map((m) => m.tag);
 
                 if (allTags.length === 0) {
-                    if (!isBackground && loading) loading.textContent = "No se pudieron obtener datos de los clanes.";
+                    if (!isBackground && loading) loading.textContent = 'No se pudieron obtener datos de los clanes.';
                     return;
                 }
 
-
                 const [prevHistory, currHistory] = await Promise.all([
-                    HistoryService.getPodium(allTags, 7, 'previous').catch(e => { console.error("Error prev podium:", e); return []; }),
-                    HistoryService.getPodium(allTags, 7, 'current').catch(e => { console.error("Error curr podium:", e); return []; })
+                    HistoryService.getPodium(allTags, 7, 'previous').catch((e) => { console.error('Error prev podium:', e); return []; }),
+                    HistoryService.getPodium(allTags, 7, 'current').catch((e) => { console.error('Error curr podium:', e); return []; })
                 ]);
 
                 this.podiumCache = this.podiumCache || {};
                 if (prevHistory && prevHistory.length > 0) {
-                    this.podiumCache['previous'] = this.processPeriodData('previous', prevHistory, allMembers);
+                    this.podiumCache.previous = this.processPeriodData('previous', prevHistory, allMembers);
                 }
                 if (currHistory && currHistory.length > 0) {
-                    this.podiumCache['current'] = this.processPeriodData('current', currHistory, allMembers);
+                    this.podiumCache.current = this.processPeriodData('current', currHistory, allMembers);
                 }
 
-                const active = this.podiumCache[this.currentPodiumPeriod] || this.podiumCache['previous'] || this.podiumCache['current'];
+                const active = this.podiumCache[this.currentPodiumPeriod] || this.podiumCache.previous || this.podiumCache.current;
                 if (active) {
                     this.podiumMembersData = active.members;
                     this.isWeekCompleted = active.isWeekCompleted;
@@ -271,17 +447,49 @@ class App {
                         this.showAllWinnersAnnouncement();
                     }
                 } else {
-                    if (!isBackground && loading) loading.textContent = "No se pudieron calcular estadísticas del podio.";
+                    if (!isBackground && loading) loading.textContent = 'No se pudieron calcular estadísticas del podio.';
                 }
             } catch (e) {
-                console.error("Error loading podium:", e);
-                if (!isBackground && loading) loading.textContent = "Error calculando el podio.";
+                console.error('Error loading podium:', e);
+                if (!isBackground && loading) loading.textContent = 'Error calculando el podio.';
             } finally {
                 this.podiumLoadingPromise = null;
             }
         })();
 
         return await this.podiumLoadingPromise;
+    }
+
+    createPodiumListItem(m, rankLabel, isGhost = false) {
+        const listTemplate = document.getElementById('podium-item-template');
+        if (!listTemplate) return document.createDocumentFragment();
+        const clone = listTemplate.content.cloneNode(true);
+        const item = clone.querySelector('.podium-item');
+
+        if (isGhost) item.classList.add('ghost');
+
+        clone.querySelector('.p-rank').textContent = rankLabel;
+
+        const icon = clone.querySelector('.p-icon');
+        icon.src = getProfileIconUrl(m.icon?.id);
+        icon.onerror = () => { icon.src = getProfileIconUrl('28000000'); };
+
+        clone.querySelector('.p-name').textContent = m.name;
+        clone.querySelector('.p-clan-badge').textContent = m.clanName;
+        clone.querySelector('.p-role').textContent = `• ${formatRole(m.role)}`;
+
+        const gainSign = m.gain > 0 ? '+' : '';
+        const gainClass = m.gain > 0 ? 'positive' : (m.gain < 0 ? 'negative' : 'neutral');
+        const gainEl = clone.querySelector('.p-gain');
+        gainEl.classList.add(gainClass);
+        clone.querySelector('.p-gain-value').textContent = `${gainSign}${formatNumber(m.gain)}`;
+
+        attachButtonBehavior(item, () => {
+            document.getElementById('podium-modal')?.classList.add('hidden');
+            this.openPlayerProfile(m.tag);
+        });
+
+        return clone;
     }
 
     renderPodiumScope() {
@@ -303,13 +511,13 @@ class App {
         const isPrev = this.currentPodiumPeriod === 'previous';
         const day = Math.max(1, Math.min(7, this.cycleDay || 1));
         if (scope === 'clan1') {
-            filtered = filtered.filter(m => m.clanScope === 'clan1');
+            filtered = filtered.filter((m) => m.clanScope === 'clan1');
             if (titleEl) titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (CLAN 1 - SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (CLAN 1 - DÍA ${day}/7)`;
         } else if (scope === 'clan2') {
-            filtered = filtered.filter(m => m.clanScope === 'clan2');
+            filtered = filtered.filter((m) => m.clanScope === 'clan2');
             if (titleEl) titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (CLAN 2 - SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (CLAN 2 - DÍA ${day}/7)`;
-        } else {
-            if (titleEl) titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (GENERAL - DÍA ${day}/7)`;
+        } else if (titleEl) {
+            titleEl.textContent = isPrev ? '🏆 SALÓN DE LA FAMA (SEMANA PASADA)' : `🥇 LÍDERES ACTUALES (GENERAL - DÍA ${day}/7)`;
         }
 
         const fantasmonesSub = document.querySelector('.fantasmones-header .text-muted');
@@ -321,43 +529,12 @@ class App {
 
         filtered.sort((a, b) => b.gain - a.gain);
 
-        const renderListItem = (m, rankIcon, rankClass, isGhost = false) => {
-            const clone = listTemplate.content.cloneNode(true);
-            const item = clone.querySelector('.podium-item');
-            
-            if (rankClass) item.classList.add(rankClass);
-            if (isGhost) item.classList.add('ghost');
-            
-            clone.querySelector('.p-rank').textContent = rankIcon;
-            
-            const icon = clone.querySelector('.p-icon');
-            icon.src = getProfileIconUrl(m.icon?.id);
-            icon.onerror = () => { icon.src = getProfileIconUrl('28000000'); };
-
-            clone.querySelector('.p-name').textContent = m.name;
-            clone.querySelector('.p-clan-badge').textContent = m.clanName;
-            clone.querySelector('.p-role').textContent = `• ${formatRole(m.role)}`;
-
-            const gainSign = m.gain > 0 ? '+' : '';
-            const gainClass = m.gain > 0 ? 'positive' : (m.gain < 0 ? 'negative' : 'neutral');
-            const gainEl = clone.querySelector('.p-gain');
-            gainEl.classList.add(gainClass);
-            clone.querySelector('.p-gain-value').textContent = `${gainSign}${formatNumber(m.gain)}`;
-
-            item.addEventListener('click', () => {
-                document.getElementById('podium-modal').classList.add('hidden');
-                this.openPlayerProfile(m.tag);
-            });
-
-            return clone;
-        };
-
         const renderTopItem = (m, rankNum) => {
             const clone = topTemplate.content.cloneNode(true);
             const step = clone.querySelector('.podium-step');
             step.classList.add(`rank-${rankNum}`);
             step.classList.add('animate');
-            
+
             if (rankNum === 1) {
                 const crown = clone.querySelector('.podium-crown');
                 if (crown) crown.classList.remove('hidden');
@@ -365,7 +542,7 @@ class App {
 
             clone.querySelector('.podium-player-name').textContent = m.name;
             clone.querySelector('.podium-player-clan').textContent = m.clanName;
-            
+
             const avatar = clone.querySelector('.podium-avatar');
             avatar.src = getProfileIconUrl(m.icon?.id);
             avatar.onerror = () => { avatar.src = getProfileIconUrl('28000000'); };
@@ -378,8 +555,8 @@ class App {
             gainEl.classList.add(gainClass);
             clone.querySelector('.p-gain-value').textContent = `${gainSign}${formatNumber(m.gain)}`;
 
-            step.addEventListener('click', () => {
-                document.getElementById('podium-modal').classList.add('hidden');
+            attachButtonBehavior(step, () => {
+                document.getElementById('podium-modal')?.classList.add('hidden');
                 this.openPlayerProfile(m.tag);
             });
 
@@ -396,27 +573,31 @@ class App {
         const bottomFrag = document.createDocumentFragment();
         const ghosts = [...filtered].reverse();
         ghosts.slice(0, 6).forEach((m) => {
-            bottomFrag.appendChild(renderListItem(m, '👻', null, true));
+            bottomFrag.appendChild(this.createPodiumListItem(m, '👻', true));
         });
         bottomList.appendChild(bottomFrag);
     }
 
     showAllWinnersAnnouncement(force = false) {
-        const today = new Date().toISOString().split('T')[0];
-        const storageKey = 'hasShownWinners_' + today;
+        const today = getLocalDateString();
+        const storageKey = `hasShownWinners_${today}`;
         if (!force && (this.hasShownWinners || !this.podiumMembersData || localStorage.getItem(storageKey))) return;
         this.hasShownWinners = true;
-        localStorage.setItem(storageKey, 'true');
+        try {
+            localStorage.setItem(storageKey, 'true');
+        } catch {
+            return;
+        }
 
         const template = document.getElementById('winners-announcement-template');
         if (!template) return;
-        
+
         const existing = document.querySelector('.winner-announcement-overlay');
         if (existing) existing.remove();
 
         const clone = template.content.cloneNode(true);
         const overlay = clone.querySelector('.winner-announcement-overlay');
-        
+
         const titleEl = clone.querySelector('.winners-title');
         if (titleEl) {
             if (!this.isWeekCompleted) {
@@ -432,19 +613,20 @@ class App {
                 titleEl.classList.add('text-gold');
             }
         }
-        
+
         const getWinner = (scope) => {
             let list = [...this.podiumMembersData];
             if (scope === 'clan1' || scope === 'clan2') {
-                list = list.filter(m => m.clanScope === scope);
+                list = list.filter((m) => m.clanScope === scope);
             }
-            return list.sort((a,b) => b.gain - a.gain)[0];
+            return list.sort((a, b) => b.gain - a.gain)[0];
         };
 
         const setupRow = (prefix, player) => {
             if (!player) return;
+            const gainSign = player.gain > 0 ? '+' : '';
             clone.querySelector(`.w-${prefix}-name`).textContent = player.name;
-            clone.querySelector(`.w-${prefix}-gain`).textContent = `+${formatNumber(player.gain)} Copas`;
+            clone.querySelector(`.w-${prefix}-gain`).textContent = `${gainSign}${formatNumber(player.gain)} Copas`;
             const av = clone.querySelector(`.w-${prefix}-avatar`);
             av.src = getProfileIconUrl(player.icon?.id);
             av.onerror = () => { av.src = getProfileIconUrl('28000000'); };
@@ -459,16 +641,16 @@ class App {
         if (confettiContainer && confettiTemplate && this.isWeekCompleted) {
             const colors = ['#ffcf33', '#ff003c', '#009dff', '#00ff66', '#d000ff'];
             const frag = document.createDocumentFragment();
-            
+
             for (let i = 0; i < 28; i++) {
                 const confNode = confettiTemplate.content.cloneNode(true);
                 const conf = confNode.querySelector('.confetti-piece');
-                
-                conf.style.setProperty('--left', Math.random() * 100 + '%');
+
+                conf.style.setProperty('--left', `${Math.random() * 100}%`);
                 conf.style.setProperty('--bg-color', colors[Math.floor(Math.random() * colors.length)]);
-                conf.style.setProperty('--anim-delay', (Math.random() * 2) + 's');
-                conf.style.setProperty('--anim-dur', (Math.random() * 2 + 2) + 's');
-                
+                conf.style.setProperty('--anim-delay', `${Math.random() * 2}s`);
+                conf.style.setProperty('--anim-dur', `${Math.random() * 2 + 2}s`);
+
                 frag.appendChild(confNode);
             }
             confettiContainer.appendChild(frag);
@@ -850,7 +1032,7 @@ class App {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => new App());
+document.addEventListener('DOMContentLoaded', () => new ClanTrackerApp());
 
 function initOrbitAnimation(clanData) {
     const container = document.getElementById("orbit-system-container");
