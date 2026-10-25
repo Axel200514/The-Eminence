@@ -671,15 +671,14 @@ export class ClanTrackerApp {
     }
 
     async loadClan() {
+        const clanCfg = this.getActiveClanConfig();
         this.showState('loading');
         try {
-            this.clanData = await ClanService.getClanData();
+            this.clanData = await ClanService.getClanData(clanCfg.tag);
             this.renderHeader();
             this.renderMembers();
             this.setupClanChart();
-            if (typeof initOrbitAnimation === 'function') {
-                initOrbitAnimation(this.clanData);
-            }
+            initOrbitAnimation(this.clanData);
             this.showState('content');
         } catch (error) {
             this.dom.errorMessage.textContent = error.message || 'Error al cargar los datos del clan.';
@@ -700,71 +699,90 @@ export class ClanTrackerApp {
     exportClanToCSV() {
         if (this.isExporting) return;
         this.isExporting = true;
-        setTimeout(() => this.isExporting = false, 1500);
+        setTimeout(() => { this.isExporting = false; }, 1500);
         if (!this.clanData || !this.clanData.members) return;
-        const members = this.clanData.members;
-        
-        let csv = "Rank,Nombre,Tag,Rol,Copas\n";
-        const sorted = [...members].sort((a, b) => b.trophies - a.trophies);
+
+        const sorted = [...this.clanData.members].sort((a, b) => b.trophies - a.trophies);
+        let csv = 'Rank,Nombre,Tag,Rol,Copas\n';
         sorted.forEach((m, index) => {
-            csv += `${index + 1},"${m.name}",${m.tag},${m.role},${m.trophies}\n`;
+            csv += `${index + 1},${escapeCsvCell(m.name)},${escapeCsvCell(m.tag)},${escapeCsvCell(m.role)},${m.trophies}\n`;
         });
-        
-        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
+
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `Clan_${this.clanData.name}_Stats_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('href', url);
+        const safeClanName = (this.clanData.name || 'Clan').replace(/[^a-zA-Z0-9_-]+/g, '_');
+        link.setAttribute('download', `Clan_${safeClanName}_Stats_${getLocalDateString()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     async setupClanChart() {
         const clanTag = this.clanData.tag;
+        const buttons = document.querySelectorAll('#clan-chart-filters button');
+
         const loadChart = async (days) => {
+            if (this.clanChartAbortController) {
+                this.clanChartAbortController.abort();
+            }
+            this.clanChartAbortController = new AbortController();
+            const { signal } = this.clanChartAbortController;
+
             try {
-                const data = await HistoryService.getHistory('clan', clanTag, days);
-                ChartManager.render('clan-chart', 'clan', data, 'Copas Totales', 'rgba(102, 252, 241, 1)');
+                const data = await HistoryService.getHistory('clan', clanTag, days, { signal });
+                ChartManager.render(
+                    'clan-chart',
+                    'clan',
+                    data,
+                    'Copas Totales',
+                    'rgba(102, 252, 241, 1)',
+                    'Sin snapshots registrados para este período.'
+                );
             } catch (e) {
-                console.error("Error loading clan chart:", e);
+                if (e.name === 'AbortError') return;
+                console.error('Error loading clan chart:', e);
+                ChartManager.render('clan-chart', 'clan', [], 'Copas Totales', 'rgba(102, 252, 241, 1)', 'No se pudo cargar el historial del clan.');
             }
         };
 
-        const buttons = document.querySelectorAll('#clan-chart-filters button');
-        buttons.forEach(btn => {
+        buttons.forEach((btn) => {
+            const btnDays = Number(btn.dataset.days);
+            btn.classList.toggle('active', btnDays === 7);
             btn.onclick = () => {
-                buttons.forEach(b => b.classList.remove('active'));
+                buttons.forEach((b) => b.classList.remove('active'));
                 btn.classList.add('active');
-                loadChart(parseInt(btn.dataset.days));
+                loadChart(btnDays);
             };
         });
-        
+
         loadChart(7);
     }
 
     renderHeader() {
         const { name, tag, description, trophies, requiredTrophies, members } = this.clanData;
-        const president = members.find(m => m.role === 'president');
+        const president = (members || []).find((m) => m.role === 'president');
 
         this.dom.clanName.textContent = name;
         this.dom.clanTag.textContent = tag;
         this.dom.clanDesc.textContent = description || 'Sin descripción';
         this.dom.totalTrophies.textContent = formatNumber(trophies);
-        this.dom.memberCount.textContent = `${members.length} / 30`;
+        this.dom.memberCount.textContent = `${(members || []).length} / 30`;
         this.dom.requiredTrophies.textContent = formatNumber(requiredTrophies);
         this.dom.presidentName.textContent = president ? president.name : 'N/A';
     }
 
     renderMembers() {
-        const query = (this.dom.searchInput.value || '').toLowerCase().trim();
-        const sortBy = this.dom.sortSelect.value || 'trophies-desc';
+        const query = (this.dom.searchInput?.value || '').toLowerCase().trim();
+        const sortBy = this.dom.sortSelect?.value || 'trophies-desc';
 
         let members = [...(this.clanData?.members || [])];
 
         if (query) {
-            members = members.filter(m => 
-                m.name.toLowerCase().includes(query) || 
+            members = members.filter((m) =>
+                m.name.toLowerCase().includes(query) ||
                 m.tag.toLowerCase().includes(query)
             );
         }
@@ -777,17 +795,28 @@ export class ClanTrackerApp {
         });
 
         this.dom.membersList.textContent = '';
+
+        if (members.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'glass-panel empty-state-card';
+            empty.textContent = query
+                ? 'No se encontraron miembros con ese nombre o tag.'
+                : 'No hay miembros disponibles en este club.';
+            this.dom.membersList.appendChild(empty);
+            return;
+        }
+
         const fragment = document.createDocumentFragment();
 
         members.forEach((member, index) => {
             const clone = this.dom.memberTemplate.content.cloneNode(true);
             const card = clone.querySelector('.member-card');
-            
+
             card.classList.add('clickable');
-            card.addEventListener('click', () => this.openPlayerProfile(member.tag));
-            
+            attachButtonBehavior(card, () => this.openPlayerProfile(member.tag));
+
             clone.querySelector('.member-rank').textContent = `#${index + 1}`;
-            
+
             const avatar = clone.querySelector('.member-avatar');
             const iconId = member.icon ? member.icon.id : null;
             avatar.src = getProfileIconUrl(iconId);
@@ -796,7 +825,7 @@ export class ClanTrackerApp {
             clone.querySelector('.member-name').textContent = member.name;
             clone.querySelector('.member-tag').textContent = member.tag;
             clone.querySelector('.member-trophies').textContent = formatNumber(member.trophies);
-            
+
             const badge = clone.querySelector('.member-role-badge');
             badge.textContent = formatRole(member.role);
             badge.classList.add(getRoleBadgeClass(member.role));
@@ -807,25 +836,46 @@ export class ClanTrackerApp {
         this.dom.membersList.appendChild(fragment);
     }
 
-    async setupPlayerChart(tag) {
+    async setupPlayerChart(tag, requestId) {
+        const buttons = document.querySelectorAll('#player-chart-filters button');
+
         const loadChart = async (days) => {
+            if (this.playerChartAbortController) {
+                this.playerChartAbortController.abort();
+            }
+            this.playerChartAbortController = new AbortController();
+            const { signal } = this.playerChartAbortController;
+
             try {
-                const data = await HistoryService.getHistory('player', tag, days);
-                ChartManager.render('player-chart', 'player', data, 'Copas Actuales', 'rgba(0, 229, 255, 1)');
+                const data = await HistoryService.getHistory('player', tag, days, { signal });
+                if (requestId !== this.activePlayerRequestId) return;
+                ChartManager.render(
+                    'player-chart',
+                    'player',
+                    data,
+                    'Copas Actuales',
+                    'rgba(0, 229, 255, 1)',
+                    'Sin datos históricos del jugador en este período.'
+                );
             } catch (e) {
-                console.error("Error loading player chart:", e);
+                if (e.name === 'AbortError') return;
+                console.error('Error loading player chart:', e);
+                if (requestId === this.activePlayerRequestId) {
+                    ChartManager.render('player-chart', 'player', [], 'Copas Actuales', 'rgba(0, 229, 255, 1)', 'No se pudo cargar el historial.');
+                }
             }
         };
 
-        const buttons = document.querySelectorAll('#player-chart-filters button');
-        buttons.forEach(btn => {
+        buttons.forEach((btn) => {
+            const btnDays = Number(btn.dataset.days);
+            btn.classList.toggle('active', btnDays === 7);
             btn.onclick = () => {
-                buttons.forEach(b => b.classList.remove('active'));
+                buttons.forEach((b) => b.classList.remove('active'));
                 btn.classList.add('active');
-                loadChart(parseInt(btn.dataset.days));
+                loadChart(btnDays);
             };
         });
-        
+
         loadChart(7);
     }
 
@@ -834,27 +884,25 @@ export class ClanTrackerApp {
         const loading = document.getElementById('modal-loading');
         const error = document.getElementById('modal-error');
         const body = document.getElementById('modal-body');
-        
+
+        this.activePlayerRequestId++;
+        const requestId = this.activePlayerRequestId;
+
+        if (this.playerAbortController) {
+            this.playerAbortController.abort();
+        }
+        this.playerAbortController = new AbortController();
+
         modal.classList.remove('hidden');
         document.body.classList.add('modal-open');
         loading.classList.remove('hidden');
         error.classList.add('hidden');
         body.classList.add('hidden');
-        
-        const closeModal = () => {
-            modal.classList.add('hidden');
-            document.body.classList.remove('modal-open');
-        };
-
-        document.getElementById('close-modal').onclick = closeModal;
-        modal.onclick = (e) => {
-            if (e.target === modal) closeModal();
-        };
 
         try {
-            const { PlayerService } = await import('../modules/core/services/player.service.js');
-            const data = await PlayerService.getPlayerData(tag);
-            
+            const data = await PlayerService.getPlayerData(tag, { signal: this.playerAbortController.signal });
+            if (requestId !== this.activePlayerRequestId) return;
+
             const total3v3 = data['3vs3Victories'] || 0;
             const totalSolo = data.soloVictories || 0;
             const totalDuo = data.duoVictories || 0;
@@ -872,7 +920,7 @@ export class ClanTrackerApp {
             let prestige2Count = 0;
             let prestige3Count = 0;
 
-            brawlers.forEach(b => {
+            brawlers.forEach((b) => {
                 unlockedStarPowers += (b.starPowers || []).length;
                 unlockedGadgets += (b.gadgets || []).length;
                 unlockedGears += (b.gears || []).length;
@@ -885,15 +933,9 @@ export class ClanTrackerApp {
                     totalPrestigeTrophies += (current - 1000);
                 }
 
-                if (peak >= 1000) {
-                    prestige1Count++;
-                }
-                if (peak >= 2000) {
-                    prestige2Count++;
-                }
-                if (peak >= 3000) {
-                    prestige3Count++;
-                }
+                if (peak >= 1000) prestige1Count++;
+                if (peak >= 2000) prestige2Count++;
+                if (peak >= 3000) prestige3Count++;
             });
 
             const totalPrestigeCount = prestige1Count + prestige2Count + prestige3Count;
@@ -935,29 +977,35 @@ export class ClanTrackerApp {
             document.getElementById('sc-3v3').textContent = formatNumber(total3v3);
             document.getElementById('sc-solo').textContent = formatNumber(totalSolo);
             document.getElementById('sc-duo').textContent = formatNumber(totalDuo);
-            
+
             const captureBtn = document.getElementById('capture-btn');
             captureBtn.classList.remove('hidden');
-            captureBtn.onclick = () => {
+            captureBtn.onclick = async () => {
                 const btnText = captureBtn.querySelector('.btn-share-text');
+                captureBtn.disabled = true;
                 if (btnText) btnText.textContent = 'Generando...';
-                html2canvas(document.getElementById('share-card'), {
-                    backgroundColor: '#0b0e14',
-                    scale: 2,
-                    useCORS: true
-                }).then(canvas => {
-                    if (btnText) btnText.textContent = 'Tarjeta Gráfica';
+                try {
+                    const html2canvasFn = await ensureHtml2Canvas();
+                    const canvas = await html2canvasFn(document.getElementById('share-card'), {
+                        backgroundColor: '#0b0e14',
+                        scale: 2,
+                        useCORS: true
+                    });
                     const link = document.createElement('a');
                     link.download = `TheEminence_${data.name}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
-                }).catch(() => {
+                } catch (err) {
+                    console.error('Share card error:', err);
+                } finally {
+                    captureBtn.disabled = false;
                     if (btnText) btnText.textContent = 'Tarjeta Gráfica';
-                });
+                }
             };
+
             document.getElementById('player-name').textContent = data.name;
             document.getElementById('player-tag').textContent = data.tag;
-            
+
             const modalIcon = document.getElementById('player-modal-icon');
             if (modalIcon) {
                 if (data.icon && data.icon.id) {
@@ -968,7 +1016,7 @@ export class ClanTrackerApp {
                     modalIcon.classList.add('hidden');
                 }
             }
-            
+
             document.getElementById('player-trophies').textContent = formatNumber(data.trophies);
             document.getElementById('player-highest-trophies').textContent = formatNumber(data.highestTrophies);
             document.getElementById('player-prestige-trophies').textContent = formatNumber(totalPrestigeTrophies);
@@ -987,27 +1035,27 @@ export class ClanTrackerApp {
             document.getElementById('player-fame-icon').src = fameIcon;
             document.getElementById('player-level').textContent = data.expLevel;
             document.getElementById('player-xp-points').textContent = formatNumber(data.expPoints);
-            
+
             document.getElementById('player-total-wins').textContent = formatNumber(totalWins);
             document.getElementById('player-hours').textContent = formatNumber(hoursSpent);
-            
+
             document.getElementById('player-3v3-wins').textContent = formatNumber(total3v3);
             document.getElementById('player-solo-wins').textContent = formatNumber(totalSolo);
             document.getElementById('player-duo-wins').textContent = formatNumber(totalDuo);
-            
+
             document.getElementById('prog-brawlers').textContent = brawlers.length;
             document.getElementById('prog-starpowers').textContent = unlockedStarPowers;
             document.getElementById('prog-gadgets').textContent = unlockedGadgets;
             document.getElementById('prog-gears').textContent = unlockedGears;
             document.getElementById('prog-hypercharges').textContent = unlockedHypercharges;
-            
+
             const brawlersList = document.getElementById('brawlers-list');
             brawlersList.textContent = '';
-            
+
             const brawlerTemplate = document.getElementById('brawler-template');
             const frag = document.createDocumentFragment();
-            
-            brawlers.sort((a, b) => b.trophies - a.trophies).slice(0, 8).forEach(brawler => {
+
+            [...brawlers].sort((a, b) => b.trophies - a.trophies).slice(0, 8).forEach((brawler) => {
                 const clone = brawlerTemplate.content.cloneNode(true);
                 const icon = clone.querySelector('.brawler-avatar');
                 if (icon) icon.src = getBrawlerIconUrl(brawler.id);
@@ -1017,14 +1065,15 @@ export class ClanTrackerApp {
                 clone.querySelector('.brawler-highest').textContent = formatNumber(brawler.highestTrophies);
                 frag.appendChild(clone);
             });
-            
+
             brawlersList.appendChild(frag);
-            
-            this.setupPlayerChart(tag);
+
+            this.setupPlayerChart(tag, requestId);
 
             loading.classList.add('hidden');
             body.classList.remove('hidden');
         } catch (err) {
+            if (err.name === 'AbortError' || requestId !== this.activePlayerRequestId) return;
             loading.classList.add('hidden');
             error.classList.remove('hidden');
             document.getElementById('modal-error-message').textContent = err.message || 'No se pudo cargar el perfil.';
@@ -1032,64 +1081,69 @@ export class ClanTrackerApp {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => new ClanTrackerApp());
-
-function initOrbitAnimation(clanData) {
-    const container = document.getElementById("orbit-system-container");
-    const template = document.getElementById("orbit-satellite-template");
+export function initOrbitAnimation(clanData) {
+    const container = document.getElementById('orbit-system-container');
+    const template = document.getElementById('orbit-satellite-template');
     if (!container || !template || !clanData || !clanData.members) return;
 
-    container.querySelectorAll('.satellite-wrapper').forEach(el => el.remove());
+    container.querySelectorAll('.satellite-wrapper').forEach((el) => el.remove());
 
     const members = clanData.members;
-    const userAcc = members.find(m => m.tag === '#YPLYVQVLL') || {
-        tag: '#YPLYVQVLL',
-        name: '🪷アレックス🪷',
-        icon: { id: 28000889 }
+    const featured = APP_CONFIG.ORBIT_FEATURED_PLAYER;
+    const userAcc = members.find((m) => m.tag === featured.tag) || {
+        tag: featured.tag,
+        name: featured.name,
+        icon: { id: featured.iconId }
     };
     const usedTags = new Set([userAcc.tag]);
-    
-    const president = members.find(m => m.role === 'president' && !usedTags.has(m.tag)) || members.find(m => !usedTags.has(m.tag));
-    if (president) usedTags.add(president.tag);
-    
-    const vicePresident = members.find(m => m.role === 'vicePresident' && !usedTags.has(m.tag)) || members.find(m => !usedTags.has(m.tag));
-    if (vicePresident) usedTags.add(vicePresident.tag);
-    
-    const topPlayer = members.find(m => !usedTags.has(m.tag)) || members[3] || members[0];
 
-    const getIconUrl = (iconId) => `https://cdn.brawlify.com/profile-icons/regular/${iconId}.png`;
+    const president = members.find((m) => m.role === 'president' && !usedTags.has(m.tag)) || members.find((m) => !usedTags.has(m.tag));
+    if (president) usedTags.add(president.tag);
+
+    const vicePresident = members.find((m) => m.role === 'vicePresident' && !usedTags.has(m.tag)) || members.find((m) => !usedTags.has(m.tag));
+    if (vicePresident) usedTags.add(vicePresident.tag);
+
+    const topPlayer = members.find((m) => !usedTags.has(m.tag)) || members[3] || members[0];
 
     const orbitData = [];
-    if (userAcc) orbitData.push({ name: `Yo (${userAcc.name})`, icon: getIconUrl(userAcc.icon?.id || '28000000') });
-    if (president) orbitData.push({ name: `Presi (${president.name})`, icon: getIconUrl(president.icon?.id || '28000000') });
-    if (vicePresident) orbitData.push({ name: `Vice (${vicePresident.name})`, icon: getIconUrl(vicePresident.icon?.id || '28000000') });
-    if (topPlayer) orbitData.push({ name: `Top (${topPlayer.name})`, icon: getIconUrl(topPlayer.icon?.id || '28000000') });
+    if (userAcc) orbitData.push({ name: `Yo (${userAcc.name})`, icon: getProfileIconUrl(userAcc.icon?.id) });
+    if (president) orbitData.push({ name: `Presi (${president.name})`, icon: getProfileIconUrl(president.icon?.id) });
+    if (vicePresident) orbitData.push({ name: `Vice (${vicePresident.name})`, icon: getProfileIconUrl(vicePresident.icon?.id) });
+    if (topPlayer) orbitData.push({ name: `Top (${topPlayer.name})`, icon: getProfileIconUrl(topPlayer.icon?.id) });
 
     const fragment = document.createDocumentFragment();
     const duration = 18;
 
     orbitData.forEach((app, index) => {
         const clone = template.content.cloneNode(true);
-        const wrapper = clone.querySelector(".satellite-wrapper");
-        const sat = clone.querySelector(".satellite");
-        const blob = clone.querySelector(".blob");
-        const inner = clone.querySelector(".satellite-inner");
-        const img = clone.querySelector("img");
-        const srOnly = clone.querySelector(".sr-only");
+        const wrapper = clone.querySelector('.satellite-wrapper');
+        const sat = clone.querySelector('.satellite');
+        const blob = clone.querySelector('.blob');
+        const inner = clone.querySelector('.satellite-inner');
+        const img = clone.querySelector('img');
+        const srOnly = clone.querySelector('.sr-only');
 
         const delay = -(duration / orbitData.length) * index;
-        
+
         wrapper.style.animationDelay = `${delay}s`;
         sat.style.animationDelay = `${delay}s`;
         blob.style.animationDelay = `${-index * 2.3}s`;
         inner.style.animationDelay = `${-index * 1.3}s`;
 
         img.src = app.icon;
-        img.alt = "";
+        img.alt = '';
         if (srOnly) srOnly.textContent = app.name;
 
         fragment.appendChild(clone);
     });
 
     container.appendChild(fragment);
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (document.getElementById('state-loading')) {
+            new ClanTrackerApp();
+        }
+    });
 }
