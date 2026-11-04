@@ -1,35 +1,38 @@
+import {
+    jsonResponse,
+    normalizeTag,
+    optionsResponse,
+    parseJsonSafely,
+    rejectDisallowedOrigin
+} from '../modules/core/edge/edge-utils.js';
+
+const SNAPSHOT_DEDUP_MODIFIER = '-2 hours';
+
 export async function onRequest(context) {
     if (context.request.method === 'OPTIONS') {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                'Access-Control-Max-Age': '86400'
-            }
-        });
+        return optionsResponse(context.request);
     }
+
+    const originError = rejectDisallowedOrigin(context.request);
+    if (originError) return originError;
 
     const url = new URL(context.request.url);
-    const playerTag = url.searchParams.get('tag');
+    const rawTag = url.searchParams.get('tag');
 
-    if (!playerTag) {
-        return new Response(JSON.stringify({ error: 'Falta el tag del jugador' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
+    if (!rawTag) {
+        return jsonResponse({ error: 'Falta el tag del jugador' }, { status: 400, request: context.request });
     }
 
-    const cleanTag = playerTag.trim().replace(/^#/, '');
+    const cleanTag = normalizeTag(rawTag, { withHash: false });
+    if (!cleanTag) {
+        return jsonResponse({ error: 'Tag de jugador inválido' }, { status: 400, request: context.request });
+    }
+
     const formattedTag = `%23${cleanTag}`;
     const apiKey = context.env.BRAWL_API_KEY;
 
     if (!apiKey) {
-        return new Response(JSON.stringify({ error: 'BRAWL_API_KEY no configurada' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
+        return jsonResponse({ error: 'BRAWL_API_KEY no configurada' }, { status: 500, request: context.request });
     }
 
     try {
@@ -39,46 +42,70 @@ export async function onRequest(context) {
                 'Accept': 'application/json'
             },
             cf: {
-                cacheTtl: 3600,
-                cacheEverything: true
+                cacheTtlByStatus: {
+                    '200-299': 3600,
+                    '404': 60,
+                    '500-599': 0
+                }
             }
         });
 
-        const data = await response.json();
+        const parsed = await parseJsonSafely(response);
+        if (!parsed.ok) {
+            const errorStatus = response.status >= 400 ? response.status : 502;
+            return jsonResponse(
+                { error: 'La API externa devolvió una respuesta no válida', status: response.status },
+                { status: errorStatus, request: context.request, cacheControl: 'no-store' }
+            );
+        }
+
+        const data = parsed.data;
+
+        if (!response.ok) {
+            return jsonResponse(data, {
+                status: response.status,
+                request: context.request,
+                cacheControl: 'no-store'
+            });
+        }
 
         if (context.env.DB && data && data.tag) {
             context.waitUntil((async () => {
                 try {
+                    const recent = await context.env.DB.prepare(
+                        `SELECT 1 FROM player_history WHERE player_tag = ? AND recorded_at >= datetime('now', ?) LIMIT 1`
+                    ).bind(data.tag, SNAPSHOT_DEDUP_MODIFIER).first();
+
+                    if (recent) {
+                        return;
+                    }
+
                     await context.env.DB.prepare(
                         `INSERT INTO player_history (player_tag, player_name, trophies, highest_trophies, victories_3v3, victories_solo, victories_duo) VALUES (?, ?, ?, ?, ?, ?, ?)`
                     ).bind(
-                        data.tag, 
-                        data.name, 
-                        data.trophies, 
-                        data.highestTrophies || null, 
-                        data['3vs3Victories'] || 0, 
-                        data.soloVictories || 0, 
+                        data.tag,
+                        data.name,
+                        data.trophies,
+                        data.highestTrophies || null,
+                        data['3vs3Victories'] || 0,
+                        data.soloVictories || 0,
                         data.duoVictories || 0
                     ).run();
                 } catch (e) {
-                    console.error("D1 Error:", e);
+                    console.error('D1 Error:', e);
                 }
             })());
         }
 
-        return new Response(JSON.stringify(data), {
+        return jsonResponse(data, {
             status: response.status,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=600'
-            }
+            request: context.request,
+            cacheControl: 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=600'
         });
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-        });
+        return jsonResponse(
+            { error: error.message || 'Error interno al consultar jugador' },
+            { status: 500, request: context.request, cacheControl: 'no-store' }
+        );
     }
 }
