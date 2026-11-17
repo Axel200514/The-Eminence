@@ -1,61 +1,72 @@
+import {
+    jsonResponse,
+    normalizeTag,
+    optionsResponse,
+    rejectDisallowedOrigin,
+    validateDays
+} from '../modules/core/edge/edge-utils.js';
+
 export async function onRequest(context) {
     if (context.request.method === 'OPTIONS') {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            }
-        });
+        return optionsResponse(context.request);
     }
+
+    const originError = rejectDisallowedOrigin(context.request);
+    if (originError) return originError;
 
     const url = new URL(context.request.url);
     const type = url.searchParams.get('type');
-    let tag = url.searchParams.get('tag');
-    const days = parseInt(url.searchParams.get('days')) || 7;
+    const rawTag = url.searchParams.get('tag');
+    const daysCheck = validateDays(url.searchParams.get('days'), 7);
 
     if (!context.env.DB) {
-        return new Response(JSON.stringify({ error: 'Database not bound' }), { status: 500, headers: {'Access-Control-Allow-Origin': '*'} });
+        return jsonResponse({ error: 'Database not bound' }, { status: 500, request: context.request });
     }
-    if (!type || !tag) {
-        return new Response(JSON.stringify({ error: 'Missing type or tag' }), { status: 400, headers: {'Access-Control-Allow-Origin': '*'} });
+    if (!type || !rawTag) {
+        return jsonResponse({ error: 'Missing type or tag' }, { status: 400, request: context.request });
+    }
+    if (type !== 'clan' && type !== 'player') {
+        return jsonResponse({ error: 'Invalid type parameter' }, { status: 400, request: context.request });
+    }
+    if (!daysCheck.valid) {
+        return jsonResponse({ error: daysCheck.error }, { status: 400, request: context.request });
     }
 
-    if (!tag.startsWith('#')) tag = '#' + tag.replace('%23', '');
+    const tag = normalizeTag(rawTag, { withHash: true });
+    if (!tag) {
+        return jsonResponse({ error: 'Invalid tag parameter' }, { status: 400, request: context.request });
+    }
 
-    const dateModifier = days === 9999 ? `'-100 years'` : `'-${days} days'`;
+    const dateModifier = daysCheck.value === 9999 ? '-100 years' : `-${daysCheck.value} days`;
 
-    let results = [];
     try {
+        let results = [];
         if (type === 'clan') {
             const query = `
-                SELECT total_trophies, member_count, recorded_at 
-                FROM clan_history 
-                WHERE clan_tag = ? AND recorded_at >= datetime('now', ${dateModifier})
+                SELECT total_trophies, member_count, recorded_at
+                FROM clan_history
+                WHERE clan_tag = ? AND recorded_at >= datetime('now', ?)
                 ORDER BY recorded_at ASC
             `;
-            const { results: rows } = await context.env.DB.prepare(query).bind(tag).all();
-            results = rows;
-        } else if (type === 'player') {
+            const { results: rows } = await context.env.DB.prepare(query).bind(tag, dateModifier).all();
+            results = rows || [];
+        } else {
             const query = `
-                SELECT trophies, highest_trophies, victories_3v3, victories_solo, victories_duo, recorded_at 
-                FROM player_history 
-                WHERE player_tag = ? AND recorded_at >= datetime('now', ${dateModifier})
+                SELECT trophies, highest_trophies, victories_3v3, victories_solo, victories_duo, recorded_at
+                FROM player_history
+                WHERE player_tag = ? AND recorded_at >= datetime('now', ?)
                 ORDER BY recorded_at ASC
             `;
-            const { results: rows } = await context.env.DB.prepare(query).bind(tag).all();
-            results = rows;
+            const { results: rows } = await context.env.DB.prepare(query).bind(tag, dateModifier).all();
+            results = rows || [];
         }
 
-        return new Response(JSON.stringify(results), {
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Cache-Control': 'public, max-age=300'
-            }
+        return jsonResponse(results, {
+            status: 200,
+            request: context.request,
+            cacheControl: 'public, max-age=300'
         });
     } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: {'Access-Control-Allow-Origin': '*'} });
+        return jsonResponse({ error: e.message }, { status: 500, request: context.request });
     }
 }
