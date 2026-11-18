@@ -1,20 +1,21 @@
+import {
+    chunkArray,
+    jsonResponse,
+    normalizeTag,
+    optionsResponse,
+    rejectDisallowedOrigin
+} from '../modules/core/edge/edge-utils.js';
+
+const MAX_TAGS = 200;
+const CHUNK_SIZE = 80;
+
 export async function onRequest(context) {
     if (context.request.method === 'OPTIONS') {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                'Access-Control-Max-Age': '86400'
-            }
-        });
+        return optionsResponse(context.request);
     }
 
-    const jsonHeaders = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-    };
+    const originError = rejectDisallowedOrigin(context.request);
+    if (originError) return originError;
 
     const url = new URL(context.request.url);
     const startDate = url.searchParams.get('start');
@@ -22,57 +23,71 @@ export async function onRequest(context) {
     const tagsParam = url.searchParams.get('tags');
 
     if (!context.env.DB) {
-        return new Response(JSON.stringify({ error: 'Database not bound' }), { status: 500, headers: jsonHeaders });
+        return jsonResponse({ error: 'Database not bound' }, { status: 500, request: context.request });
     }
     if (!startDate || !endDate) {
-        return new Response(JSON.stringify({ error: 'Missing start or end' }), { status: 400, headers: jsonHeaders });
+        return jsonResponse({ error: 'Missing start or end' }, { status: 400, request: context.request });
     }
 
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
-        return new Response(JSON.stringify({ error: 'Invalid date format' }), { status: 400, headers: jsonHeaders });
+    if (!dateRegex.test(startDate) || !dateRegex.test(endDate) || startDate > endDate) {
+        return jsonResponse({ error: 'Invalid date format or range' }, { status: 400, request: context.request });
     }
 
     if (!tagsParam) {
-        return new Response(JSON.stringify({ error: 'Missing tags parameter' }), { status: 400, headers: jsonHeaders });
+        return jsonResponse({ error: 'Missing tags parameter' }, { status: 400, request: context.request });
     }
 
-    let tags = tagsParam.split(',').map(t => t.trim()).filter(Boolean);
-    tags = tags.map(t => t.startsWith('#') ? t : '#' + t.replace('%23', ''));
+    const tags = [...new Set(
+        tagsParam.split(',').map((t) => normalizeTag(t, { withHash: true })).filter(Boolean)
+    )];
+
     if (tags.length === 0) {
-        return new Response(JSON.stringify([]), { headers: jsonHeaders });
+        return jsonResponse([], { status: 200, request: context.request, cacheControl: 'public, max-age=300' });
     }
 
-    tags = tags.slice(0, 50);
+    if (tags.length > MAX_TAGS) {
+        return jsonResponse(
+            { error: `Se excedió el límite máximo de ${MAX_TAGS} tags por reporte` },
+            { status: 400, request: context.request }
+        );
+    }
 
-    const placeholders = tags.map(() => '?').join(',');
-    const tagsCondition = `AND player_tag IN (${placeholders})`;
-    const params = [startDate, endDate, ...tags];
+    const startBound = `${startDate} 00:00:00`;
+    const endBound = `${endDate} 23:59:59`;
+    const tagChunks = chunkArray(tags, CHUNK_SIZE);
 
     try {
-        const query = `
-            SELECT player_tag, player_name, 
-                   start_trophies, end_trophies
-            FROM (
-                SELECT player_tag, player_name,
-                       FIRST_VALUE(trophies) OVER (PARTITION BY player_tag ORDER BY recorded_at ASC) as start_trophies,
-                       FIRST_VALUE(trophies) OVER (PARTITION BY player_tag ORDER BY recorded_at DESC) as end_trophies,
-                       ROW_NUMBER() OVER (PARTITION BY player_tag ORDER BY recorded_at DESC) as rn
-                FROM player_history
-                WHERE date(recorded_at) >= ? AND date(recorded_at) <= ?
-                  ${tagsCondition}
-            ) WHERE rn = 1;
-        `;
-        
-        const { results } = await context.env.DB.prepare(query).bind(...params).all();
+        const results = [];
 
-        return new Response(JSON.stringify(results || []), {
-            headers: {
-                ...jsonHeaders,
-                'Cache-Control': 'public, max-age=300'
+        for (const chunk of tagChunks) {
+            const placeholders = chunk.map(() => '?').join(',');
+            const query = `
+                SELECT player_tag, player_name,
+                       start_trophies, end_trophies
+                FROM (
+                    SELECT player_tag, player_name,
+                           FIRST_VALUE(trophies) OVER (PARTITION BY player_tag ORDER BY recorded_at ASC) as start_trophies,
+                           FIRST_VALUE(trophies) OVER (PARTITION BY player_tag ORDER BY recorded_at DESC) as end_trophies,
+                           ROW_NUMBER() OVER (PARTITION BY player_tag ORDER BY recorded_at DESC) as rn
+                    FROM player_history
+                    WHERE player_tag IN (${placeholders})
+                      AND recorded_at >= ? AND recorded_at <= ?
+                ) WHERE rn = 1
+            `;
+
+            const { results: rows } = await context.env.DB.prepare(query).bind(...chunk, startBound, endBound).all();
+            if (Array.isArray(rows)) {
+                results.push(...rows);
             }
+        }
+
+        return jsonResponse(results, {
+            status: 200,
+            request: context.request,
+            cacheControl: 'public, max-age=300'
         });
     } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: jsonHeaders });
+        return jsonResponse({ error: e.message }, { status: 500, request: context.request });
     }
 }
