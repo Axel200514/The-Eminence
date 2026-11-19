@@ -299,7 +299,7 @@ export class ClanTrackerApp {
             isWeekCompleted = true;
             cycleDay = 7;
         } else {
-            isWeekCompleted = daysSinceWed === 0 || daysSinceStart >= 6.8;
+            isWeekCompleted = false;
             cycleDay = daysSinceWed === 0 ? 7 : daysSinceWed;
         }
 
@@ -429,8 +429,17 @@ export class ClanTrackerApp {
                     this.podiumCache.current = this.processPeriodData('current', currHistory, allMembers);
                 }
 
-                const active = this.podiumCache[this.currentPodiumPeriod] || this.podiumCache.previous || this.podiumCache.current;
+                const resolvedPeriod = this.podiumCache[this.currentPodiumPeriod]
+                    ? this.currentPodiumPeriod
+                    : (this.podiumCache.previous ? 'previous' : (this.podiumCache.current ? 'current' : null));
+                const active = resolvedPeriod ? this.podiumCache[resolvedPeriod] : null;
                 if (active) {
+                    if (resolvedPeriod !== this.currentPodiumPeriod) {
+                        this.currentPodiumPeriod = resolvedPeriod;
+                        document.querySelectorAll('#podium-period-tabs button').forEach((b) => {
+                            b.classList.toggle('active', b.dataset.period === resolvedPeriod);
+                        });
+                    }
                     this.podiumMembersData = active.members;
                     this.isWeekCompleted = active.isWeekCompleted;
                     this.cycleDay = active.cycleDay;
